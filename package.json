@@ -1,7 +1,8 @@
 {
   "name": "schedule-my-tasks",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "homepage": "https://gges5110.github.io/ScheduleMyTasksV2",
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
