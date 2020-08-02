@@ -1,3 +1,5 @@
+![Build and Deploy](https://github.com/gges5110/ScheduleMyTasksV2/workflows/Build%20and%20Deploy/badge.svg)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
