@@ -1,14 +1,22 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
-import { AppBar, Button, Toolbar } from "@material-ui/core";
+import { useLocation, useHistory } from "react-router-dom";
+import { AppBar, Avatar, Button, IconButton, Toolbar } from "@material-ui/core";
 import Container from "@material-ui/core/Container";
 import { NavMenuButton } from "./NavMenuButton";
 import EventIcon from "@material-ui/icons/Event";
 import ListIcon from "@material-ui/icons/List";
-import SettingsIcon from "@material-ui/icons/Settings";
+import { User } from "firebase";
+import { auth } from "../firebase/config";
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  readonly user?: User;
+}
+
+export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
   const location = useLocation();
+  const history = useHistory();
+
+  const loggedIn = user !== undefined;
 
   return (
     <AppBar position="relative">
@@ -31,14 +39,31 @@ export const Header: React.FC = () => {
             name={"Lists"}
             startIcon={<ListIcon />}
           />
-          <NavMenuButton
-            to={"/settings"}
-            selected={location.pathname === "/settings"}
-            name={"Settings"}
-            startIcon={<SettingsIcon />}
-          />
           <div style={{ flexGrow: 1 }} />
-          <Button color="inherit">Login</Button>
+          {loggedIn ? (
+            <>
+              <IconButton
+                size={"small"}
+                onClick={() => {
+                  history.push("/settings");
+                }}
+              >
+                <Avatar alt="userProfile" src={user?.photoURL || ""} />
+              </IconButton>
+
+              <Button
+                color="inherit"
+                onClick={() => {
+                  console.log("Log out");
+                  auth.signOut();
+                }}
+              >
+                Log out
+              </Button>
+            </>
+          ) : (
+            <Button color="inherit">Log in</Button>
+          )}
         </Toolbar>
       </Container>
     </AppBar>
