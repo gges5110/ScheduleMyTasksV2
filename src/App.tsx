@@ -3,6 +3,8 @@ import "./App.css";
 import { Page } from "./components/Page";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { BrowserRouter } from "react-router-dom";
+import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
 
 const theme = createMuiTheme({
   palette: {
@@ -23,11 +25,13 @@ const theme = createMuiTheme({
 
 const App: React.FC = () => (
   <ThemeProvider theme={theme}>
-    <BrowserRouter basename="/ScheduleMyTasksV2">
-      <div className="App">
-        <Page />
-      </div>
-    </BrowserRouter>
+    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+      <BrowserRouter basename="/ScheduleMyTasksV2">
+        <div className="App">
+          <Page />
+        </div>
+      </BrowserRouter>
+    </MuiPickersUtilsProvider>
   </ThemeProvider>
 );
 

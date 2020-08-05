@@ -2,8 +2,9 @@ import React from "react";
 import { Route, Switch } from "react-router-dom";
 import { Home } from "../pages/Home";
 import { Calendar } from "../pages/Calendar";
-import { EventLists } from "../pages/EventLists";
+import { TaskLists } from "../pages/TaskLists";
 import { Settings } from "../pages/Settings";
+import { TaskList } from "../pages/TaskList";
 
 export const Routes: React.FC = () => {
   return (
@@ -15,8 +16,9 @@ export const Routes: React.FC = () => {
         <Calendar />
       </Route>
       <Route path="/lists" exact={true}>
-        <EventLists />
+        <TaskLists />
       </Route>
+      <Route path="/lists/:uid" exact={true} component={TaskList} />
       <Route path="/settings" exact={true}>
         <Settings />
       </Route>
