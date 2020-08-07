@@ -78,7 +78,7 @@ export const TaskList: React.FC<RouteChildrenProps> = (
   return (
     <>
       <Breadcrumbs aria-label="breadcrumb">
-        <Link color="inherit" href="/ScheduleMyTasksV2/lists">
+        <Link color="inherit" href="/lists">
           Lists
         </Link>
         <Typography color="textPrimary">{taskList.name}</Typography>
