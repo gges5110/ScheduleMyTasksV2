@@ -26,7 +26,7 @@ const theme = createMuiTheme({
 const App: React.FC = () => (
   <ThemeProvider theme={theme}>
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <BrowserRouter basename="/ScheduleMyTasksV2">
+      <BrowserRouter>
         <div className="App">
           <Page />
         </div>
