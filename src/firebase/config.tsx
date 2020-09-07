@@ -3,7 +3,7 @@ import "firebase/database";
 import "firebase/auth";
 import "firebase/analytics";
 
-export const config = {
+export const firebaseConfig = {
   apiKey: "AIzaSyBgtxCFprO-DVdh6Wq0xaXi_suC4F-tRwA",
   authDomain: "schedulemytasks.firebaseapp.com",
   databaseURL: "https://schedulemytasks.firebaseio.com",
@@ -14,10 +14,8 @@ export const config = {
   measurementId: "G-QXYEV3LXKC",
 };
 
-firebase.initializeApp(config);
+firebase.initializeApp(firebaseConfig);
 firebase.analytics();
-
-export const authProvider = new firebase.auth.GoogleAuthProvider();
 
 export const auth = firebase.auth();
 export const database = firebase.database();

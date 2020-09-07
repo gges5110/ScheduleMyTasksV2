@@ -18,6 +18,11 @@ export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
 
   const loggedIn = user !== undefined;
 
+  const onSignOut = () => {
+    console.log("Log out");
+    auth.signOut().then(() => gapi.auth2.getAuthInstance().signOut());
+  };
+
   return (
     <AppBar position="relative">
       <Container maxWidth="lg">
@@ -51,13 +56,7 @@ export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
                 <Avatar alt="userProfile" src={user?.photoURL || ""} />
               </IconButton>
 
-              <Button
-                color="inherit"
-                onClick={() => {
-                  console.log("Log out");
-                  auth.signOut();
-                }}
-              >
+              <Button color="inherit" onClick={onSignOut}>
                 Log out
               </Button>
             </>
