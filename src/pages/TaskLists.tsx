@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { ChangeEvent, useContext, useMemo, useState } from "react";
 import { database } from "../firebase/config";
 import { useFirebaseQuery } from "../hooks/useFirebaseQuery";
 import {
@@ -17,14 +17,40 @@ import {
 import { Link } from "react-router-dom";
 import { UserContext } from "../components/Page";
 
+export interface TaskListsType {
+  readonly name: string;
+  readonly taskCount: number;
+}
+
+export interface StringMapType<T> {
+  [index: string]: T;
+}
+
 export const TaskLists: React.FC = () => {
   const [newListName, setNewListName] = useState<string>("");
   const user = useContext(UserContext);
+  const uid = user?.uid;
 
   const taskListsQuery = useMemo(() => {
-    return database.ref(`/taskLists/${user?.uid}`).orderByValue();
-  }, [user]);
-  const taskLists: any = useFirebaseQuery(taskListsQuery);
+    return database.ref(`/taskLists/${uid}`).orderByValue();
+  }, [uid]);
+  const taskLists: StringMapType<TaskListsType> = useFirebaseQuery(
+    taskListsQuery
+  );
+
+  const createNewTaskList = () => {
+    database.ref(`/taskLists/${user?.uid}`).push({
+      name: newListName,
+      taskCount: 0,
+    });
+  };
+
+  const handleNewListNameChange = (
+    event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    setNewListName(event.target.value);
+  };
+
   return (
     <>
       <TableContainer component={Paper}>
@@ -32,6 +58,7 @@ export const TaskLists: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
+              <TableCell>Tasks</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -41,6 +68,9 @@ export const TaskLists: React.FC = () => {
                 <TableRow key={taskList.name}>
                   <TableCell component="th" scope="row">
                     <Link to={`/lists/${key}`}>{taskList.name}</Link>
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    {taskList.taskCount}
                   </TableCell>
                 </TableRow>
               );
@@ -55,7 +85,7 @@ export const TaskLists: React.FC = () => {
           <Input
             id="component-simple"
             value={newListName}
-            onChange={(event) => setNewListName(event.target.value)}
+            onChange={handleNewListNameChange}
           />
         </FormControl>
         <Button
@@ -63,11 +93,7 @@ export const TaskLists: React.FC = () => {
           type={"button"}
           color={"primary"}
           variant={"contained"}
-          onClick={() => {
-            database.ref(`/taskLists/${user?.uid}`).push({
-              name: newListName,
-            });
-          }}
+          onClick={createNewTaskList}
         >
           Add
         </Button>

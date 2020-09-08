@@ -1,21 +1,18 @@
 import React, { useContext, useMemo, useState } from "react";
-import { RouteChildrenProps, useHistory } from "react-router-dom";
+import {
+  Link as RouterLink,
+  RouteChildrenProps,
+  useHistory,
+} from "react-router-dom";
 import {
   Breadcrumbs,
   Button,
-  Checkbox,
   createStyles,
   FormControl,
   Input,
   InputLabel,
   Link,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Theme,
   Typography,
 } from "@material-ui/core";
@@ -26,6 +23,9 @@ import { DateTimePicker, TimePicker } from "@material-ui/pickers";
 import { makeStyles } from "@material-ui/core/styles";
 import { DeleteTaskListDialog } from "../components/TaskList/DeleteTaskListDialog";
 import { DeleteTaskDialog } from "../components/TaskList/DeleteTaskDialog";
+import { StringMapType } from "./TaskLists";
+import { TaskListTable } from "../components/TaskList/TaskListTable";
+import { TaskType } from "../interfaces/Task";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -74,11 +74,12 @@ export const TaskList: React.FC<RouteChildrenProps> = (
   const tasksQuery = useMemo(() => {
     return database.ref(`/tasks/${uid}`).orderByValue();
   }, [uid]);
-  const tasks: any = useFirebaseQuery(tasksQuery);
+  const tasks: StringMapType<TaskType> = useFirebaseQuery(tasksQuery);
+
   return (
     <>
       <Breadcrumbs aria-label="breadcrumb">
-        <Link color="inherit" href="/lists">
+        <Link color="inherit" component={RouterLink} to="/lists">
           Lists
         </Link>
         <Typography color="textPrimary">{taskList.name}</Typography>
@@ -96,90 +97,15 @@ export const TaskList: React.FC<RouteChildrenProps> = (
         Delete Task List
       </Button>
       <>
-        <TableContainer component={Paper}>
-          <Table aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Done</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Due Date</TableCell>
-                <TableCell>Remaining Time</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {Object.keys(tasks).map((key: string) => {
-                const task = tasks[key];
-                return (
-                  <TableRow key={task.name}>
-                    <TableCell component="th" scope="row">
-                      <Checkbox
-                        checked={task.isDone}
-                        onChange={(
-                          event: React.ChangeEvent<HTMLInputElement>
-                        ) => {
-                          database.ref(`/tasks/${uid}/${key}`).set({
-                            ...task,
-                            isDone: event.target.checked,
-                          });
-                        }}
-                        inputProps={{ "aria-label": "primary checkbox" }}
-                      />
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Input
-                        defaultValue={task.name}
-                        onBlur={(event) =>
-                          database.ref(`/tasks/${uid}/${key}`).set({
-                            ...task,
-                            name: event.target.value,
-                          })
-                        }
-                      />
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <DateTimePicker
-                        value={new Date(task.dueDate)}
-                        onChange={(date) => {
-                          database.ref(`/tasks/${uid}/${key}`).set({
-                            ...task,
-                            dueDate: date?.getTime(),
-                          });
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <TimePicker
-                        ampm={false}
-                        value={new Date(task.ETA)}
-                        minutesStep={30}
-                        autoOk={true}
-                        onChange={(date) => {
-                          database.ref(`/tasks/${uid}/${key}`).set({
-                            ...task,
-                            ETA: date?.getTime(),
-                          });
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      <Button
-                        variant={"contained"}
-                        color={"default"}
-                        onClick={() => {
-                          setDeleteTaskDialogOpen(true);
-                          setTaskUidToDelete(key);
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <TaskListTable
+          tasks={tasks}
+          uid={uid}
+          onTaskDelete={(key) => {
+            setDeleteTaskDialogOpen(true);
+            setTaskUidToDelete(key);
+          }}
+        />
+
         <div style={{ height: 24 }} />
         <Paper>
           <form autoComplete="off" className={classes.root}>
@@ -224,7 +150,10 @@ export const TaskList: React.FC<RouteChildrenProps> = (
                   isDone: false,
                 };
                 database.ref(`/tasks/${uid}`).push(value);
-
+                database.ref(`/taskLists/${user?.uid}/${uid}`).set({
+                  name: taskList.name,
+                  taskCount: taskList.taskCount + 1,
+                });
                 // Reset values
                 setNewTaskName("");
               }}
@@ -238,6 +167,10 @@ export const TaskList: React.FC<RouteChildrenProps> = (
           handleClose={() => setDeleteTaskDialogOpen(false)}
           handleDelete={() => {
             database.ref(`/tasks/${uid}/${taskUidToDelete}`).remove();
+            database.ref(`/taskLists/${user?.uid}/${uid}`).set({
+              name: taskList.name,
+              taskCount: taskList.taskCount - 1,
+            });
             setDeleteTaskDialogOpen(false);
           }}
         />

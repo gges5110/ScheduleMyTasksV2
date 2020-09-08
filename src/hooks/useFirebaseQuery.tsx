@@ -8,22 +8,22 @@ export const useFirebaseQuery = (query: any) => {
   const state: any = useRef({});
 
   useEffect(() => {
-    function update() {
+    const update = () => {
       clearInterval(timer.current);
       timer.current = setTimeout(() => {
         setValue({ ...state.current });
       });
-    }
+    };
 
-    function childAddedOrChanged(snap: any) {
+    const childAddedOrChanged = (snap: any) => {
       state.current[snap.key] = snap.val();
       update();
-    }
+    };
 
-    function childRemoved(snap: any) {
+    const childRemoved = (snap: any) => {
       delete state.current[snap.key];
       update();
-    }
+    };
 
     query.on("child_added", childAddedOrChanged);
     query.on("child_removed", childRemoved);

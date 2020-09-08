@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
           />
           <NavMenuButton
             to={"/lists"}
-            selected={location.pathname === "/lists"}
+            selected={location.pathname.includes("/lists")}
             name={"Lists"}
             startIcon={<ListIcon />}
           />
