@@ -3,7 +3,7 @@ import "./App.css";
 import { Page } from "./components/Page";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { BrowserRouter } from "react-router-dom";
-import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+import { LocalizationProvider } from '@material-ui/pickers';
 import DateFnsUtils from "@date-io/date-fns";
 
 const theme = createMuiTheme({
@@ -25,13 +25,13 @@ const theme = createMuiTheme({
 
 const App: React.FC = () => (
   <ThemeProvider theme={theme}>
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+    <LocalizationProvider dateAdapter={DateFnsUtils}>
       <BrowserRouter>
         <div className="App">
           <Page />
         </div>
       </BrowserRouter>
-    </MuiPickersUtilsProvider>
+    </LocalizationProvider>
   </ThemeProvider>
 );
 

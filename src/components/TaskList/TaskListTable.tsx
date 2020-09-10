@@ -10,6 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField
 } from "@material-ui/core";
 import { database } from "../../firebase/config";
 import { DateTimePicker, TimePicker } from "@material-ui/pickers";
@@ -74,6 +75,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                 </TableCell>
                 <TableCell component="th" scope="row">
                   <DateTimePicker
+                    renderInput={(props) => <TextField {...props} />}
                     value={new Date(task.dueDate)}
                     onChange={(date) => {
                       database.ref(`/tasks/${uid}/${key}`).set({
@@ -85,10 +87,10 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                 </TableCell>
                 <TableCell component="th" scope="row">
                   <TimePicker
+                    renderInput={(props) => <TextField {...props} />}
                     ampm={false}
                     value={new Date(task.ETA)}
                     minutesStep={30}
-                    autoOk={true}
                     onChange={(date) => {
                       database.ref(`/tasks/${uid}/${key}`).set({
                         ...task,

@@ -13,6 +13,7 @@ import {
   InputLabel,
   Link,
   Paper,
+  TextField,
   Theme,
   Typography,
 } from "@material-ui/core";
@@ -121,6 +122,7 @@ export const TaskList: React.FC<RouteChildrenProps> = (
             </FormControl>
             <FormControl required={true}>
               <DateTimePicker
+                renderInput={(props) => <TextField {...props} />}
                 label="Due Date"
                 value={selectedDueDate}
                 onChange={handleDueDateChange}
@@ -128,6 +130,7 @@ export const TaskList: React.FC<RouteChildrenProps> = (
             </FormControl>
             <FormControl required={true}>
               <TimePicker
+                renderInput={(props) => <TextField {...props} />}
                 clearable
                 ampm={false}
                 label={"ETA"}
