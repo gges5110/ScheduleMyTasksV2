@@ -1,9 +1,9 @@
-import React from "react";
 import "./App.css";
+import * as React from "react";
 import { Page } from "./components/Page";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { BrowserRouter } from "react-router-dom";
-import { LocalizationProvider } from '@material-ui/pickers';
+import { LocalizationProvider } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 
 const theme = createMuiTheme({

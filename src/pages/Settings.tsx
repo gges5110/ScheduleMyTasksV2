@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { UserContext } from "../components/Page";
+import { UserContext } from "../contexts/Contexts";
 
 export const Settings: React.FC = () => {
   const userContext = useContext(UserContext);
