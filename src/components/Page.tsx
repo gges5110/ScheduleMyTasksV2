@@ -8,12 +8,14 @@ import { auth } from "../firebase/config";
 import * as firebase from "firebase";
 import { User } from "firebase";
 import { API_KEY, CLIENT_ID, DISCOVERY_DOCS, SCOPES } from "../googleApiConfig";
+import { CalendarContext, UserContext } from "../contexts/Contexts";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     flexDirection: "column",
     minHeight: "100vh",
+    backgroundColor: "aliceblue",
   },
   main: {
     marginTop: theme.spacing(3),
@@ -75,7 +77,7 @@ export const Page: React.FC = () => {
 
       <CalendarContext.Provider value={calendar}>
         <UserContext.Provider value={user}>
-          <Container component="main" className={classes.main} maxWidth="lg">
+          <Container component="main" className={classes.main} maxWidth="xl">
             <Routes />
           </Container>
         </UserContext.Provider>
@@ -85,8 +87,3 @@ export const Page: React.FC = () => {
     </div>
   );
 };
-
-export const UserContext = React.createContext<User | undefined>(undefined);
-export const CalendarContext = React.createContext<CalendarConfig>({
-  isReady: false,
-});

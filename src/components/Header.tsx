@@ -4,7 +4,6 @@ import { AppBar, Avatar, Button, IconButton, Toolbar } from "@material-ui/core";
 import Container from "@material-ui/core/Container";
 import { NavMenuButton } from "./NavMenuButton";
 import EventIcon from "@material-ui/icons/Event";
-import ListIcon from "@material-ui/icons/List";
 import { User } from "firebase";
 import { auth } from "../firebase/config";
 
@@ -31,18 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
             to={"/"}
             selected={location.pathname === "/"}
             name={"Schedule My Tasks"}
-          />
-          <NavMenuButton
-            to={"/calendar"}
-            selected={location.pathname === "/calendar"}
-            name={"Calendar"}
             startIcon={<EventIcon />}
-          />
-          <NavMenuButton
-            to={"/lists"}
-            selected={location.pathname.includes("/lists")}
-            name={"Lists"}
-            startIcon={<ListIcon />}
           />
           <div style={{ flexGrow: 1 }} />
           {loggedIn ? (

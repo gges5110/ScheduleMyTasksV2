@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 
-export const useFirebaseQuery = (query: any) => {
+export const useFirebaseQuery = (query: any): any => {
   const [value, setValue] = useState({});
 
   // Debounce state changes to avoid excessive initial rendering

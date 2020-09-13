@@ -10,15 +10,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField
+  TextField,
 } from "@material-ui/core";
 import { database } from "../../firebase/config";
-import { DateTimePicker, TimePicker } from "@material-ui/pickers";
-import { StringMapType } from "../../pages/TaskLists";
+import { MobileDateTimePicker, MobileTimePicker } from "@material-ui/pickers";
 import { TaskType } from "../../interfaces/Task";
+import firebase from "firebase";
 
 interface TaskListTableProps {
-  readonly tasks: StringMapType<TaskType>;
+  readonly tasks: firebase.database.DataSnapshot[];
   readonly uid: string;
 
   onTaskDelete(key: string): void;
@@ -38,16 +38,17 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
       <Table aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Done</TableCell>
+            <TableCell width={"5%"}>Done</TableCell>
             <TableCell>Name</TableCell>
-            <TableCell>Due Date</TableCell>
-            <TableCell>Remaining Time</TableCell>
-            <TableCell>Action</TableCell>
+            <TableCell width={"20%"}>Due Date</TableCell>
+            <TableCell width={"10%"}>Remaining Time</TableCell>
+            <TableCell width={"10%"}>Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {Object.keys(tasks).map((key: string) => {
-            const task = tasks[key];
+          {tasks.map((snapshot) => {
+            const task: TaskType = snapshot.val();
+            const key = snapshot.key || "";
             return (
               <TableRow key={task.name}>
                 <TableCell component="th" scope="row">
@@ -64,6 +65,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                 </TableCell>
                 <TableCell component="th" scope="row">
                   <Input
+                    style={{ width: "100%" }}
                     defaultValue={task.name}
                     onBlur={(event) =>
                       database.ref(`/tasks/${uid}/${key}`).set({
@@ -74,9 +76,10 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                   />
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  <DateTimePicker
+                  <MobileDateTimePicker
                     renderInput={(props) => <TextField {...props} />}
-                    value={new Date(task.dueDate)}
+                    value={new Date(Number(task.dueDate))}
+                    inputFormat={"MM/dd/yyyy HH:mm"}
                     onChange={(date) => {
                       database.ref(`/tasks/${uid}/${key}`).set({
                         ...task,
@@ -86,10 +89,10 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                   />
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  <TimePicker
+                  <MobileTimePicker
                     renderInput={(props) => <TextField {...props} />}
                     ampm={false}
-                    value={new Date(task.ETA)}
+                    value={new Date(Number(task.ETA))}
                     minutesStep={30}
                     onChange={(date) => {
                       database.ref(`/tasks/${uid}/${key}`).set({
