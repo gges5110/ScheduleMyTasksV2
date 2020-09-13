@@ -25,7 +25,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   const labelId = `checkbox-list-label-${taskListName}`;
 
   const [tasks] = useList(
-    database.ref(`/tasks/${taskListKey}`).orderByChild("isDone")
+    database.ref(`/tasks/${taskListKey}`).orderByChild("isDoneTimestamp")
   );
 
   return (
@@ -42,6 +42,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             database.ref(`/tasks/${taskListKey}/${taskKey}`).set({
               ...task,
               isDone: event.target.checked,
+              isDoneTimestamp: event.target.checked ? new Date().valueOf() : 0,
             });
           };
 

@@ -57,7 +57,7 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
   const classes = useTaskListDialogStyles();
 
   const [tasks] = useList(
-    database.ref(`/tasks/${taskListKey}`).orderByChild("isDone")
+    database.ref(`/tasks/${taskListKey}`).orderByChild("isDoneTimestamp")
   );
 
   // New Task Form
@@ -91,15 +91,15 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
   const onClickAddNewTask = () => {
     const value: TaskType = {
       name: newTaskName,
-      dueDate: String(selectedDueDate?.getTime()) || "",
-      ETA: String(selectedRemainingTime?.getTime()) || "",
+      dueDate: selectedDueDate?.getTime() || 0,
+      ETA: selectedRemainingTime?.getTime() || 0,
       isDone: false,
+      isDoneTimestamp: null,
     };
     database.ref(`/tasks/${taskListKey}`).push(value);
     database.ref(`/taskLists/${userId}/${taskListKey}`).set({
       name: taskList.name,
       taskCount: taskList.taskCount + 1,
-      // remainingTaskCount: taskList.remainingTaskCount + 1,
     });
     // Reset values
     setNewTaskName("");
