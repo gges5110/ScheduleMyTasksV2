@@ -1,8 +1,9 @@
 export interface TaskType {
   readonly name: string;
   readonly isDone: boolean;
-  readonly dueDate: string;
-  readonly ETA: string;
+  readonly isDoneTimestamp: number | null;
+  readonly dueDate: number;
+  readonly ETA: number;
 }
 
 export interface TaskListType {
