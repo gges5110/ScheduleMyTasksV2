@@ -11,7 +11,7 @@ import { useFirebaseQuery } from "../hooks/useFirebaseQuery";
 import { TaskList } from "../components/TaskList/TaskList";
 import { TaskListDialog } from "../components/TaskList/TaskListDialog";
 import { CreateTaskListForm } from "../components/CreateTaskListForm";
-import { StringMapType, TaskListType } from "../interfaces/Task";
+import { StringMapType, TaskListType, TaskType } from "../interfaces/Task";
 import { UserContext } from "../contexts/Contexts";
 import { Calendar } from "../components/Calendar/Calendar";
 
@@ -42,11 +42,21 @@ export const Home: React.FC = () => {
   // TaskList
   const user = useContext(UserContext);
   const uid = user?.uid;
-  const taskListsQuery = useMemo(() => {
-    return database.ref(`/taskLists/${uid}`).orderByValue();
-  }, [uid]);
+  const taskListsQuery = useMemo(
+    () => database.ref(`/${uid}/taskLists`).orderByValue(),
+    [uid]
+  );
   const taskLists: StringMapType<TaskListType> = useFirebaseQuery(
     taskListsQuery
+  );
+
+  const tasksQuery = useMemo(
+    () => database.ref(`/${uid}/tasks`).orderByValue(),
+    [uid]
+  );
+
+  const tasksMap: StringMapType<StringMapType<TaskType>> = useFirebaseQuery(
+    tasksQuery
   );
 
   return (
@@ -54,8 +64,7 @@ export const Home: React.FC = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} lg={9}>
           <Paper className={classes.paper}>
-            {/* To be populated */}
-            <Calendar tasks={[]} />
+            <Calendar tasks={convert(tasksMap)} />
           </Paper>
         </Grid>
         <Grid item xs={12} lg={3}>
@@ -86,6 +95,7 @@ export const Home: React.FC = () => {
                     <TaskList
                       taskListKey={key}
                       taskListName={taskList.name}
+                      userId={user?.uid || ""}
                       openTaskListDialog={openTaskListDialog}
                     />
                   </Paper>
@@ -110,4 +120,13 @@ export const Home: React.FC = () => {
       )}
     </div>
   );
+};
+
+const convert = (t: StringMapType<StringMapType<TaskType>>): TaskType[] => {
+  const taskTypeArray: TaskType[] = [];
+  Object.keys(t).forEach((taskListKey) => {
+    const t1 = t[taskListKey];
+    Object.keys(t1).forEach((taskKey) => taskTypeArray.push(t1[taskKey]));
+  });
+  return taskTypeArray;
 };

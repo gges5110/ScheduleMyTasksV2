@@ -8,8 +8,6 @@ export interface TaskType {
 
 export interface TaskListType {
   readonly name: string;
-  readonly taskCount: number;
-  readonly remainingTaskCount: number;
 }
 
 export interface StringMapType<T> {

@@ -13,6 +13,7 @@ import { useList } from "react-firebase-hooks/database";
 interface TaskListProps {
   readonly taskListKey: string;
   readonly taskListName: string;
+  readonly userId: string;
 
   openTaskListDialog(): void;
 }
@@ -20,12 +21,15 @@ interface TaskListProps {
 export const TaskList: React.FC<TaskListProps> = ({
   taskListKey,
   taskListName,
+  userId,
   openTaskListDialog,
 }) => {
   const labelId = `checkbox-list-label-${taskListName}`;
 
   const [tasks] = useList(
-    database.ref(`/tasks/${taskListKey}`).orderByChild("isDoneTimestamp")
+    database
+      .ref(`/${userId}/tasks/${taskListKey}`)
+      .orderByChild("isDoneTimestamp")
   );
 
   return (
@@ -39,7 +43,7 @@ export const TaskList: React.FC<TaskListProps> = ({
             event: React.ChangeEvent<HTMLInputElement>,
             taskKey: string
           ) => {
-            database.ref(`/tasks/${taskListKey}/${taskKey}`).set({
+            database.ref(`/${userId}/tasks/${taskListKey}/${taskKey}`).set({
               ...task,
               isDone: event.target.checked,
               isDoneTimestamp: event.target.checked ? new Date().valueOf() : 0,

@@ -10,11 +10,14 @@ export const CreateTaskListForm: React.FC<CreateTaskListFormProps> = ({
   userId,
 }) => {
   const [newListName, setNewListName] = useState<string>("");
-  const createNewTaskList = () => {
-    database.ref(`/taskLists/${userId}`).push({
+  const createNewTaskList = (
+    event:
+      | React.FormEvent<HTMLFormElement>
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    database.ref(`/${userId}/taskLists`).push({
       name: newListName,
-      taskCount: 0,
-      remainingTaskCount: 0,
     });
     setNewListName("");
   };
@@ -26,7 +29,7 @@ export const CreateTaskListForm: React.FC<CreateTaskListFormProps> = ({
   };
 
   return (
-    <form autoComplete="off">
+    <form autoComplete="off" onSubmit={createNewTaskList}>
       <FormControl required={true}>
         <InputLabel htmlFor="component-simple">New List Name</InputLabel>
         <Input
