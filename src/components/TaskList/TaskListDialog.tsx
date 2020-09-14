@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { database } from "../../firebase/config";
-import { TaskListType, TaskType } from "../../interfaces/Task";
+import { TaskListType } from "../../interfaces/Task";
 import {
   Button,
   createStyles,
@@ -8,32 +8,22 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
   Grid,
   Input,
-  InputLabel,
   makeStyles,
   Paper,
-  TextField,
   Theme,
 } from "@material-ui/core";
 import { TaskListTable } from "./TaskListTable";
-import { DateTimePicker, TimePicker } from "@material-ui/pickers";
 import { DeleteTaskDialog } from "./DeleteTaskDialog";
 import { DeleteTaskListDialog } from "./DeleteTaskListDialog";
 import { useList } from "react-firebase-hooks/database";
+import { CreateTaskForm } from "../CreateTaskForm";
 
 const useTaskListDialogStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       backgroundColor: "aliceblue",
-    },
-    form: {
-      "& > *": {
-        margin: theme.spacing(1),
-        width: "25ch",
-      },
-      textAlign: "center",
     },
   })
 );
@@ -57,18 +47,10 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
   const classes = useTaskListDialogStyles();
 
   const [tasks] = useList(
-    database.ref(`/tasks/${taskListKey}`).orderByChild("isDoneTimestamp")
+    database
+      .ref(`/${userId}/tasks/${taskListKey}`)
+      .orderByChild("isDoneTimestamp")
   );
-
-  // New Task Form
-  const [selectedDueDate, handleDueDateChange] = useState<Date | null>(
-    new Date()
-  );
-  const [
-    selectedRemainingTime,
-    handleRemainingTimeChange,
-  ] = useState<Date | null>(new Date(8 * 3600 * 1000));
-  const [newTaskName, setNewTaskName] = useState<string>("");
 
   // Delete Task
   const [deleteTaskDialogOpen, setDeleteTaskDialogOpen] = useState<boolean>(
@@ -80,38 +62,17 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
   const [taskUidToDelete, setTaskUidToDelete] = useState<string>("");
 
   const handleDeleteTask = () => {
-    database.ref(`/tasks/${taskListKey}/${taskUidToDelete}`).remove();
-    database.ref(`/taskLists/${userId}/${taskListKey}`).set({
-      name: taskList.name,
-      taskCount: taskList.taskCount - 1,
-    });
+    database.ref(`/${userId}/tasks/${taskListKey}/${taskUidToDelete}`).remove();
     setDeleteTaskDialogOpen(false);
-  };
-
-  const onClickAddNewTask = () => {
-    const value: TaskType = {
-      name: newTaskName,
-      dueDate: selectedDueDate?.getTime() || 0,
-      ETA: selectedRemainingTime?.getTime() || 0,
-      isDone: false,
-      isDoneTimestamp: null,
-    };
-    database.ref(`/tasks/${taskListKey}`).push(value);
-    database.ref(`/taskLists/${userId}/${taskListKey}`).set({
-      name: taskList.name,
-      taskCount: taskList.taskCount + 1,
-    });
-    // Reset values
-    setNewTaskName("");
   };
 
   const handleDeleteTaskList = () => {
     database
-      .ref(`/taskLists/${userId}/${taskListKey}`)
+      .ref(`/${userId}/taskLists/${taskListKey}`)
       .remove()
       .then(() => {
         database
-          .ref(`/tasks/${taskListKey}`)
+          .ref(`/${userId}/tasks/${taskListKey}`)
           .remove()
           .then(() => {
             setDeleteTaskListDialogOpen(false);
@@ -129,16 +90,13 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
       aria-labelledby="form-dialog-title"
     >
       <DialogTitle id="form-dialog-title">
-        <Grid
-          justify="space-between" // Add it here :)
-          container
-        >
+        <Grid justify="space-between" container>
           <Grid item>
             <Input
               fullWidth={false}
               defaultValue={taskList.name}
               onBlur={(event) => {
-                database.ref(`/taskLists/${userId}/${taskListKey}`).set({
+                database.ref(`/${userId}/taskLists/${taskListKey}`).set({
                   ...taskList,
                   name: event.target.value,
                 });
@@ -163,6 +121,7 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
         <TaskListTable
           tasks={tasks || []}
           uid={taskListKey || ""}
+          userId={userId}
           onTaskDelete={(key) => {
             setDeleteTaskDialogOpen(true);
             setTaskUidToDelete(key);
@@ -170,48 +129,7 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
         />
         <div style={{ height: 24 }} />
         <Paper>
-          <form autoComplete="off" className={classes.form}>
-            <FormControl required={true}>
-              <InputLabel htmlFor="new-task-name-input">
-                New Task Name
-              </InputLabel>
-              <Input
-                id="new-task-name-input"
-                value={newTaskName}
-                onChange={(event) => setNewTaskName(event.target.value)}
-              />
-            </FormControl>
-            <FormControl required={true}>
-              <DateTimePicker
-                renderInput={(props) => <TextField {...props} />}
-                label="Due Date"
-                inputFormat={"MM/dd/yyyy HH:mm"}
-                value={selectedDueDate}
-                onChange={handleDueDateChange}
-              />
-            </FormControl>
-            <FormControl required={true}>
-              <TimePicker
-                renderInput={(props) => <TextField {...props} />}
-                clearable
-                ampm={false}
-                label={"ETA"}
-                value={selectedRemainingTime}
-                minutesStep={30}
-                onChange={handleRemainingTimeChange}
-              />
-            </FormControl>
-            <Button
-              style={{ marginTop: 12, marginLeft: 12 }}
-              type={"button"}
-              color={"primary"}
-              variant={"contained"}
-              disabled={newTaskName === ""}
-              onClick={onClickAddNewTask}
-            >
-              Add
-            </Button>
-          </form>
+          <CreateTaskForm userId={userId} taskListKey={taskListKey} />
         </Paper>
         <DeleteTaskDialog
           open={deleteTaskDialogOpen}

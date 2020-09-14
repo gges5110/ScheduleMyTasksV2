@@ -20,13 +20,14 @@ import firebase from "firebase";
 interface TaskListTableProps {
   readonly tasks: firebase.database.DataSnapshot[];
   readonly uid: string;
-
+  readonly userId: string;
   onTaskDelete(key: string): void;
 }
 
 export const TaskListTable: React.FC<TaskListTableProps> = ({
   tasks,
   uid,
+  userId,
   onTaskDelete,
 }) => {
   const handleOnTaskDelete = (key: string) => {
@@ -49,13 +50,14 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
           {tasks.map((snapshot) => {
             const task: TaskType = snapshot.val();
             const key = snapshot.key || "";
+            const path = `/${userId}/tasks/${uid}/${key}`;
             return (
               <TableRow key={task.name}>
                 <TableCell component="th" scope="row">
                   <Checkbox
                     checked={task.isDone}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      database.ref(`/tasks/${uid}/${key}`).set({
+                      database.ref(path).set({
                         ...task,
                         isDone: event.target.checked,
                       });
@@ -68,7 +70,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                     style={{ width: "100%" }}
                     defaultValue={task.name}
                     onBlur={(event) =>
-                      database.ref(`/tasks/${uid}/${key}`).set({
+                      database.ref(path).set({
                         ...task,
                         name: event.target.value,
                       })
@@ -81,7 +83,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                     value={new Date(Number(task.dueDate))}
                     inputFormat={"MM/dd/yyyy HH:mm"}
                     onChange={(date) => {
-                      database.ref(`/tasks/${uid}/${key}`).set({
+                      database.ref(path).set({
                         ...task,
                         dueDate: date?.getTime(),
                       });
@@ -95,7 +97,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                     value={new Date(Number(task.ETA))}
                     minutesStep={30}
                     onChange={(date) => {
-                      database.ref(`/tasks/${uid}/${key}`).set({
+                      database.ref(path).set({
                         ...task,
                         ETA: date?.getTime(),
                       });
