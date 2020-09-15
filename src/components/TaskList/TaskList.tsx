@@ -45,7 +45,9 @@ export const TaskList: React.FC<TaskListProps> = ({
           ) => {
             database.ref(`/${userId}/tasks/${taskListKey}/${taskKey}`).update({
               isDone: event.target.checked,
-              isDoneTimestamp: event.target.checked ? new Date().valueOf() : 0,
+              isDoneTimestamp: event.target.checked
+                ? new Date().valueOf()
+                : null,
             });
           };
 
