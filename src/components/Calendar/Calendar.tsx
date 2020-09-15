@@ -8,6 +8,7 @@ import {
   TodayButton,
   Toolbar,
   WeekView,
+  AppointmentTooltip,
 } from "@devexpress/dx-react-scheduler-material-ui";
 import { CALENDAR_ID } from "../../pages/Home";
 import { TaskType } from "../../interfaces/Task";
@@ -83,6 +84,7 @@ export const Calendar: React.FC<CalendarProps> = ({ tasks }) => {
       <TodayButton />
       <WeekView startDayHour={9} endDayHour={19} />
       <Appointments />
+      <AppointmentTooltip showCloseButton showOpenButton />
     </Scheduler>
   );
 };

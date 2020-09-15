@@ -59,6 +59,9 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       database.ref(path).update({
                         isDone: event.target.checked,
+                        isDoneTimestamp: event.target.checked
+                          ? new Date().valueOf()
+                          : null,
                       });
                     }}
                     inputProps={{ "aria-label": "primary checkbox" }}
