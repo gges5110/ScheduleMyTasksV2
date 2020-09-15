@@ -96,8 +96,7 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
               fullWidth={false}
               defaultValue={taskList.name}
               onBlur={(event) => {
-                database.ref(`/${userId}/taskLists/${taskListKey}`).set({
-                  ...taskList,
+                database.ref(`/${userId}/taskLists/${taskListKey}`).update({
                   name: event.target.value,
                 });
               }}

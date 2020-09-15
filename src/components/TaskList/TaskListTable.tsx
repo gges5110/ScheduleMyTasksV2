@@ -57,8 +57,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                   <Checkbox
                     checked={task.isDone}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                      database.ref(path).set({
-                        ...task,
+                      database.ref(path).update({
                         isDone: event.target.checked,
                       });
                     }}
@@ -70,8 +69,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                     style={{ width: "100%" }}
                     defaultValue={task.name}
                     onBlur={(event) =>
-                      database.ref(path).set({
-                        ...task,
+                      database.ref(path).update({
                         name: event.target.value,
                       })
                     }
@@ -83,8 +81,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                     value={new Date(Number(task.dueDate))}
                     inputFormat={"MM/dd/yyyy HH:mm"}
                     onChange={(date) => {
-                      database.ref(path).set({
-                        ...task,
+                      database.ref(path).update({
                         dueDate: date?.getTime(),
                       });
                     }}
@@ -97,8 +94,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                     value={new Date(Number(task.ETA))}
                     minutesStep={30}
                     onChange={(date) => {
-                      database.ref(path).set({
-                        ...task,
+                      database.ref(path).update({
                         ETA: date?.getTime(),
                       });
                     }}

@@ -35,7 +35,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   return (
     <List subheader={<>{taskListName}</>} key={taskListKey} dense={true}>
       {tasks &&
-        tasks.map((snapshot) => {
+        tasks.map((snapshot, index: number) => {
           const task: TaskType = snapshot.val();
           const key = snapshot.key || "";
 
@@ -43,15 +43,14 @@ export const TaskList: React.FC<TaskListProps> = ({
             event: React.ChangeEvent<HTMLInputElement>,
             taskKey: string
           ) => {
-            database.ref(`/${userId}/tasks/${taskListKey}/${taskKey}`).set({
-              ...task,
+            database.ref(`/${userId}/tasks/${taskListKey}/${taskKey}`).update({
               isDone: event.target.checked,
               isDoneTimestamp: event.target.checked ? new Date().valueOf() : 0,
             });
           };
 
           return (
-            <ListItem key={taskListName}>
+            <ListItem key={key}>
               <ListItemIcon>
                 <Checkbox
                   checked={task.isDone}
