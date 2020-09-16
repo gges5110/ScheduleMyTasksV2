@@ -1,13 +1,16 @@
 import React, { ChangeEvent, useState } from "react";
 import { database } from "../firebase/config";
 import { Button, FormControl, Input, InputLabel } from "@material-ui/core";
+import { TaskListType } from "../interfaces/Task";
 
 interface CreateTaskListFormProps {
   readonly userId: string;
+  readonly taskListCount: number;
 }
 
 export const CreateTaskListForm: React.FC<CreateTaskListFormProps> = ({
   userId,
+  taskListCount,
 }) => {
   const [newListName, setNewListName] = useState<string>("");
   const createNewTaskList = (
@@ -16,9 +19,11 @@ export const CreateTaskListForm: React.FC<CreateTaskListFormProps> = ({
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.preventDefault();
-    database.ref(`/${userId}/taskLists`).push({
+    const newTaskList: TaskListType = {
       name: newListName,
-    });
+      sortingIndex: taskListCount,
+    };
+    database.ref(`/${userId}/taskLists`).push(newTaskList);
     setNewListName("");
   };
 

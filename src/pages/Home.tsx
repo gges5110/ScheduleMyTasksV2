@@ -14,6 +14,9 @@ import { CreateTaskListForm } from "../components/CreateTaskListForm";
 import { StringMapType, TaskListType, TaskType } from "../interfaces/Task";
 import { UserContext } from "../contexts/Contexts";
 import { Calendar } from "../components/Calendar/Calendar";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { DndProvider } from "react-dnd";
+import { DragContainer } from "../components/DragContainer";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -43,7 +46,7 @@ export const Home: React.FC = () => {
   const user = useContext(UserContext);
   const uid = user?.uid;
   const taskListsQuery = useMemo(
-    () => database.ref(`/${uid}/taskLists`).orderByValue(),
+    () => database.ref(`/${uid}/taskLists`).orderByChild("sortingIndex"),
     [uid]
   );
   const taskLists: StringMapType<TaskListType> = useFirebaseQuery(
@@ -59,6 +62,9 @@ export const Home: React.FC = () => {
     tasksQuery
   );
 
+  const sortedTaskListKeys = Object.keys(taskLists).sort(
+    (a, b) => taskLists[a].sortingIndex - taskLists[b].sortingIndex
+  );
   return (
     <div className={classes.root}>
       <Grid container spacing={3}>
@@ -77,31 +83,53 @@ export const Home: React.FC = () => {
           >
             <Grid item style={{ width: "100%" }}>
               <Paper className={classes.paper}>
-                <CreateTaskListForm userId={user?.uid || ""} />
+                <CreateTaskListForm
+                  userId={user?.uid || ""}
+                  taskListCount={sortedTaskListKeys.length}
+                />
               </Paper>
             </Grid>
+            <DndProvider backend={HTML5Backend}>
+              {sortedTaskListKeys.map((key: string, index: number) => {
+                const taskList = taskLists[key];
 
-            {Object.keys(taskLists).map((key: string) => {
-              const taskList = taskLists[key];
+                const openTaskListDialog = () => {
+                  setTaskListDialogOpen(true);
+                  setOpeningTaskList(taskList);
+                  setOpeningTaskListKey(key);
+                };
 
-              const openTaskListDialog = () => {
-                setTaskListDialogOpen(true);
-                setOpeningTaskList(taskList);
-                setOpeningTaskListKey(key);
-              };
-              return (
-                <Grid item style={{ width: "100%" }} key={key}>
-                  <Paper className={classes.paper}>
-                    <TaskList
-                      taskListKey={key}
-                      taskListName={taskList.name}
-                      userId={user?.uid || ""}
-                      openTaskListDialog={openTaskListDialog}
-                    />
-                  </Paper>
-                </Grid>
-              );
-            })}
+                const moveCard = (dragIndex: number, hoverIndex: number) => {
+                  const targetKey = sortedTaskListKeys[dragIndex];
+
+                  database
+                    .ref(`/${uid}/taskLists/${key}`)
+                    .update({
+                      sortingIndex: dragIndex,
+                    })
+                    .then(() => {
+                      database.ref(`/${uid}/taskLists/${targetKey}`).update({
+                        sortingIndex: hoverIndex,
+                      });
+                    });
+                };
+
+                return (
+                  <Grid item style={{ width: "100%" }} key={key}>
+                    <DragContainer id={key} index={index} moveItem={moveCard}>
+                      <Paper className={classes.paper}>
+                        <TaskList
+                          taskListKey={key}
+                          taskListName={taskList.name}
+                          userId={user?.uid || ""}
+                          openTaskListDialog={openTaskListDialog}
+                        />
+                      </Paper>
+                    </DragContainer>
+                  </Grid>
+                );
+              })}
+            </DndProvider>
           </Grid>
         </Grid>
       </Grid>
