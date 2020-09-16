@@ -15,13 +15,13 @@ export const useFirebaseQuery = (query: any): any => {
       });
     };
 
-    const childAddedOrChanged = (snap: any) => {
-      state.current[snap.key] = snap.val();
+    const childAddedOrChanged = (snap: firebase.database.DataSnapshot) => {
+      state.current[snap.key || ""] = snap.val();
       update();
     };
 
-    const childRemoved = (snap: any) => {
-      delete state.current[snap.key];
+    const childRemoved = (snap: firebase.database.DataSnapshot) => {
+      delete state.current[snap.key || ""];
       update();
     };
 

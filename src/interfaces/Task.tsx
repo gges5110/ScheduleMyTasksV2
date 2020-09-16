@@ -8,6 +8,7 @@ export interface TaskType {
 
 export interface TaskListType {
   readonly name: string;
+  readonly sortingIndex: number;
 }
 
 export interface StringMapType<T> {
