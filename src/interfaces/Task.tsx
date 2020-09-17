@@ -10,8 +10,6 @@ export interface TaskWithTaskListKeyType extends TaskType {
   readonly taskListKey: string;
 }
 
-export type WithKey<T> = T & { key: string };
-
 export interface TaskListType {
   readonly name: string;
   readonly sortingIndex: number;
