@@ -35,6 +35,7 @@ interface TaskListDialogProps {
   readonly userId: string;
 
   handleClose(): void;
+  onTaskSchedule(taskListKey: string, taskKey: string): void;
 }
 
 export const TaskListDialog: React.FC<TaskListDialogProps> = ({
@@ -43,6 +44,7 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
   taskList,
   taskListKey,
   userId,
+  onTaskSchedule,
 }) => {
   const classes = useTaskListDialogStyles();
 
@@ -81,6 +83,12 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
       });
   };
 
+  const updateTaskListName = (name: string) => {
+    database.ref(`/${userId}/taskLists/${taskListKey}`).update({
+      name,
+    });
+  };
+
   return (
     <Dialog
       open={open}
@@ -96,9 +104,7 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
               fullWidth={false}
               defaultValue={taskList.name}
               onBlur={(event) => {
-                database.ref(`/${userId}/taskLists/${taskListKey}`).update({
-                  name: event.target.value,
-                });
+                updateTaskListName(event.target.value);
               }}
             />
           </Grid>
@@ -124,6 +130,10 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
           onTaskDelete={(key) => {
             setDeleteTaskDialogOpen(true);
             setTaskUidToDelete(key);
+          }}
+          onTaskSchedule={(taskKey) => {
+            handleClose();
+            onTaskSchedule(taskListKey, taskKey);
           }}
         />
         <div style={{ height: 24 }} />
