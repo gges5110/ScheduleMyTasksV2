@@ -1,4 +1,10 @@
-import { AppointmentModel, ViewState } from "@devexpress/dx-react-scheduler";
+import {
+  AppointmentModel,
+  ChangeSet,
+  EditingState,
+  IntegratedEditing,
+  ViewState,
+} from "@devexpress/dx-react-scheduler";
 import React, { useContext, useEffect, useState } from "react";
 import { CalendarContext } from "../../contexts/Contexts";
 import {
@@ -9,9 +15,11 @@ import {
   Toolbar,
   WeekView,
   AppointmentTooltip,
+  DragDropProvider,
 } from "@devexpress/dx-react-scheduler-material-ui";
 import { CALENDAR_ID } from "../../pages/Home";
-import { TaskType } from "../../interfaces/Task";
+import { StringMapType, TaskWithTaskListKeyType } from "../../interfaces/Task";
+import { database } from "../../firebase/config";
 
 const now = new Date();
 const oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000;
@@ -38,10 +46,11 @@ const googleCalendarEventToAppointmentModelConverter = (
 };
 
 interface CalendarProps {
-  readonly tasks: TaskType[];
+  readonly tasks: StringMapType<TaskWithTaskListKeyType>;
+  readonly userId: string;
 }
 
-export const Calendar: React.FC<CalendarProps> = ({ tasks }) => {
+export const Calendar: React.FC<CalendarProps> = ({ tasks, userId }) => {
   const [events, setEvents] = useState<AppointmentModel[]>([]);
   const [currentDate, setCurrentDate] = useState<Date>(now);
 
@@ -73,28 +82,49 @@ export const Calendar: React.FC<CalendarProps> = ({ tasks }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate, calendarContext.isReady]);
 
+  const onCommitChanges = ({ changed }: ChangeSet) => {
+    if (changed) {
+      Object.keys(changed).forEach((taskKey) => {
+        const task = tasks[taskKey];
+        const path = `/${userId}/tasks/${task.taskListKey}/${taskKey}`;
+        const change = changed[taskKey];
+        database.ref(path).update({
+          dueDate: change.startDate.valueOf(),
+        });
+      });
+    }
+  };
+
   return (
     <Scheduler data={[...events, ...convertTaskToAppointmentModel(tasks)]}>
       <ViewState
         currentDate={currentDate}
         onCurrentDateChange={setCurrentDate}
       />
+      <EditingState onCommitChanges={onCommitChanges} />
+      <IntegratedEditing />
       <Toolbar />
       <DateNavigator />
       <TodayButton />
       <WeekView startDayHour={9} endDayHour={19} />
       <Appointments />
+
       <AppointmentTooltip showCloseButton showOpenButton />
+      <DragDropProvider allowDrag={() => true} />
     </Scheduler>
   );
 };
 
 const convertTaskToAppointmentModel = (
-  tasks: TaskType[]
+  tasks: StringMapType<TaskWithTaskListKeyType>
 ): AppointmentModel[] => {
-  return tasks.map((task) => ({
-    startDate: task.dueDate,
-    endDate: task.dueDate,
-    title: task.name,
-  }));
+  return Object.keys(tasks).map((taskKey) => {
+    const task = tasks[taskKey];
+    return {
+      startDate: task.dueDate,
+      endDate: task.dueDate,
+      title: task.name,
+      id: taskKey,
+    };
+  });
 };

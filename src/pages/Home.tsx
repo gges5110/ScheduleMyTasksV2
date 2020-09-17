@@ -11,7 +11,13 @@ import { useFirebaseQuery } from "../hooks/useFirebaseQuery";
 import { TaskList } from "../components/TaskList/TaskList";
 import { TaskListDialog } from "../components/TaskList/TaskListDialog";
 import { CreateTaskListForm } from "../components/CreateTaskListForm";
-import { StringMapType, TaskListType, TaskType } from "../interfaces/Task";
+import {
+  StringMapType,
+  TaskListType,
+  TaskType,
+  TaskWithTaskListKeyType,
+  WithKey,
+} from "../interfaces/Task";
 import { UserContext } from "../contexts/Contexts";
 import { Calendar } from "../components/Calendar/Calendar";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -70,7 +76,7 @@ export const Home: React.FC = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} lg={9}>
           <Paper className={classes.paper}>
-            <Calendar tasks={convert(tasksMap)} />
+            <Calendar tasks={convert(tasksMap)} userId={user?.uid || ""} />
           </Paper>
         </Grid>
         <Grid item xs={12} lg={3}>
@@ -138,6 +144,9 @@ export const Home: React.FC = () => {
           open={taskListDialogOpen}
           taskList={openingTaskList}
           taskListKey={openingTaskListKey}
+          onTaskSchedule={(taskListKey, taskKey) => {
+            console.log("Should put tentative events onto calendar");
+          }}
           userId={user?.uid || ""}
           handleClose={() => {
             setTaskListDialogOpen(false);
@@ -150,11 +159,18 @@ export const Home: React.FC = () => {
   );
 };
 
-const convert = (t: StringMapType<StringMapType<TaskType>>): TaskType[] => {
-  const taskTypeArray: TaskType[] = [];
+const convert = (
+  t: StringMapType<StringMapType<TaskType>>
+): StringMapType<TaskWithTaskListKeyType> => {
+  const taskTypeArray: StringMapType<TaskWithTaskListKeyType> = {};
   Object.keys(t).forEach((taskListKey) => {
     const t1 = t[taskListKey];
-    Object.keys(t1).forEach((taskKey) => taskTypeArray.push(t1[taskKey]));
+    Object.keys(t1).forEach((taskKey) => {
+      taskTypeArray[taskKey] = {
+        ...t1[taskKey],
+        taskListKey: taskListKey,
+      };
+    });
   });
   return taskTypeArray;
 };
