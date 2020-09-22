@@ -67,7 +67,7 @@ export const TaskList: React.FC<TaskListProps> = ({
                 }}
                 id={labelId}
                 primary={task.name}
-                secondary={new Date(Number(task.dueDate)).toLocaleString()}
+                secondary={new Date(task.startDateTime).toLocaleString()}
                 onClick={openTaskListDialog}
               />
             </ListItem>

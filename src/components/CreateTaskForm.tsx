@@ -11,7 +11,7 @@ import {
   TextField,
   Theme,
 } from "@material-ui/core";
-import { DateTimePicker, TimePicker } from "@material-ui/pickers";
+import { DateTimePicker } from "@material-ui/pickers";
 
 const useCreateTaskFormStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -36,14 +36,14 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
 }) => {
   const classes = useCreateTaskFormStyles();
 
-  const [selectedDueDate, handleDueDateChange] = useState<Date | null>(
-    new Date()
-  );
   const [newTaskName, setNewTaskName] = useState<string>("");
   const [
-    selectedRemainingTime,
-    handleRemainingTimeChange,
-  ] = useState<Date | null>(new Date(8 * 3600 * 1000));
+    selectedStartDate,
+    handleSelectedStartDateChange,
+  ] = useState<Date | null>(new Date());
+  const [selectedEndDate, handleSelectedEndDateChange] = useState<Date | null>(
+    new Date()
+  );
 
   const onClickAddNewTask = (
     event:
@@ -57,8 +57,8 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
   const createNewTask = () => {
     const value: TaskType = {
       name: newTaskName,
-      dueDate: selectedDueDate?.getTime() || 0,
-      ETA: selectedRemainingTime?.getTime() || 0,
+      startDateTime: selectedStartDate?.getTime() || 0,
+      endDateTime: selectedEndDate?.getTime() || 0,
       isDone: false,
       isDoneTimestamp: null,
     };
@@ -92,21 +92,19 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
       <FormControl required={true}>
         <DateTimePicker
           renderInput={(props) => <TextField {...props} />}
-          label="Due Date"
+          label="Start Date"
           inputFormat={"MM/dd/yyyy HH:mm"}
-          value={selectedDueDate}
-          onChange={handleDueDateChange}
+          value={selectedStartDate}
+          onChange={handleSelectedStartDateChange}
         />
       </FormControl>
       <FormControl required={true}>
-        <TimePicker
+        <DateTimePicker
           renderInput={(props) => <TextField {...props} />}
-          clearable
-          ampm={false}
-          label={"ETA"}
-          value={selectedRemainingTime}
-          minutesStep={30}
-          onChange={handleRemainingTimeChange}
+          label="End Date"
+          inputFormat={"MM/dd/yyyy HH:mm"}
+          value={selectedStartDate}
+          onChange={handleSelectedEndDateChange}
         />
       </FormControl>
       <Button

@@ -35,7 +35,6 @@ interface TaskListDialogProps {
   readonly userId: string;
 
   handleClose(): void;
-  onTaskSchedule(taskListKey: string, taskKey: string): void;
 }
 
 export const TaskListDialog: React.FC<TaskListDialogProps> = ({
@@ -44,7 +43,6 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
   taskList,
   taskListKey,
   userId,
-  onTaskSchedule,
 }) => {
   const classes = useTaskListDialogStyles();
 
@@ -130,10 +128,6 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
           onTaskDelete={(key) => {
             setDeleteTaskDialogOpen(true);
             setTaskUidToDelete(key);
-          }}
-          onTaskSchedule={(taskKey) => {
-            handleClose();
-            onTaskSchedule(taskListKey, taskKey);
           }}
         />
         <div style={{ height: 24 }} />

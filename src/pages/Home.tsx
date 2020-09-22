@@ -70,15 +70,28 @@ export const Home: React.FC = () => {
   const sortedTaskListKeys = Object.keys(taskLists).sort(
     (a, b) => taskLists[a].sortingIndex - taskLists[b].sortingIndex
   );
+
+  const [scheduleMode, setScheduleMode] = useState<boolean>(false);
   return (
     <div className={classes.root}>
       <Grid container spacing={3}>
-        <Grid item xs={12} lg={9}>
+        <Grid item xs={12} lg={scheduleMode ? 12 : 9}>
           <Paper className={classes.paper}>
-            <Calendar tasks={convert(tasksMap)} userId={user?.uid || ""} />
+            <Calendar
+              tasks={convert(tasksMap)}
+              userId={user?.uid || ""}
+              scheduleMode={scheduleMode}
+              setScheduleMode={(scheduleMode) => setScheduleMode(scheduleMode)}
+            />
           </Paper>
         </Grid>
-        <Grid item xs={12} lg={3}>
+
+        <Grid
+          item
+          xs={12}
+          lg={3}
+          style={{ display: scheduleMode ? "none" : undefined }}
+        >
           <Grid
             container
             direction="column"
@@ -143,9 +156,6 @@ export const Home: React.FC = () => {
           open={taskListDialogOpen}
           taskList={openingTaskList}
           taskListKey={openingTaskListKey}
-          onTaskSchedule={(taskListKey, taskKey) => {
-            console.log("Should put tentative events onto calendar");
-          }}
           userId={user?.uid || ""}
           handleClose={() => {
             setTaskListDialogOpen(false);

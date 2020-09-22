@@ -13,7 +13,7 @@ import {
   TextField,
 } from "@material-ui/core";
 import { database } from "../../firebase/config";
-import { MobileDateTimePicker, MobileTimePicker } from "@material-ui/pickers";
+import { MobileDateTimePicker } from "@material-ui/pickers";
 import { TaskType } from "../../interfaces/Task";
 import firebase from "firebase";
 
@@ -22,7 +22,6 @@ interface TaskListTableProps {
   readonly uid: string;
   readonly userId: string;
   onTaskDelete(key: string): void;
-  onTaskSchedule(taskKey: string): void;
 }
 
 export const TaskListTable: React.FC<TaskListTableProps> = ({
@@ -30,7 +29,6 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
   uid,
   userId,
   onTaskDelete,
-  onTaskSchedule,
 }) => {
   const handleOnTaskDelete = (key: string) => {
     onTaskDelete(key);
@@ -43,9 +41,9 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
           <TableRow>
             <TableCell width={"5%"}>Done</TableCell>
             <TableCell>Name</TableCell>
-            <TableCell width={"15%"}>Due Date</TableCell>
-            <TableCell width={"10%"}>Remaining Time</TableCell>
-            <TableCell width={"20%"}>Action</TableCell>
+            <TableCell width={"15%"}>Start</TableCell>
+            <TableCell width={"15%"}>End</TableCell>
+            <TableCell width={"10%"}>Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -81,42 +79,33 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                   />
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  <MobileDateTimePicker
+                  <MobileDateTimePicker<Date>
                     renderInput={(props) => <TextField {...props} />}
-                    value={new Date(Number(task.dueDate))}
+                    ampm={false}
+                    minutesStep={30}
+                    value={new Date(task.startDateTime)}
                     inputFormat={"MM/dd/yyyy HH:mm"}
                     onChange={(date) => {
                       database.ref(path).update({
-                        dueDate: date?.getTime(),
+                        startDateTime: date?.getTime(),
                       });
                     }}
                   />
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  <MobileTimePicker
+                  <MobileDateTimePicker<Date>
                     renderInput={(props) => <TextField {...props} />}
                     ampm={false}
-                    value={new Date(Number(task.ETA))}
                     minutesStep={30}
+                    value={new Date(task.endDateTime)}
                     onChange={(date) => {
                       database.ref(path).update({
-                        ETA: date?.getTime(),
+                        endDateTime: date?.getTime(),
                       });
                     }}
                   />
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  <Button
-                    color={"primary"}
-                    variant={"contained"}
-                    disabled={task.isDone}
-                    onClick={() => {
-                      onTaskSchedule(key);
-                    }}
-                    style={{ marginRight: 8 }}
-                  >
-                    Schedule
-                  </Button>
                   <Button
                     variant={"contained"}
                     color={"default"}
