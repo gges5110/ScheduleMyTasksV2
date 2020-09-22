@@ -5,8 +5,7 @@ import {
   IntegratedEditing,
   ViewState,
 } from "@devexpress/dx-react-scheduler";
-import React, { useContext, useEffect, useState } from "react";
-import { CalendarContext } from "../../contexts/Contexts";
+import React, { useState } from "react";
 import {
   Appointments,
   DateNavigator,
@@ -16,71 +15,46 @@ import {
   WeekView,
   AppointmentTooltip,
   DragDropProvider,
+  ViewSwitcher,
+  MonthView,
 } from "@devexpress/dx-react-scheduler-material-ui";
-import { CALENDAR_ID } from "../../pages/Home";
 import { StringMapType, TaskWithTaskListKeyType } from "../../interfaces/Task";
 import { database } from "../../firebase/config";
+import { FormControlLabel, Switch } from "@material-ui/core";
 
 const now = new Date();
-const oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000;
-const googleCalendarEventToAppointmentModelConverter = (
-  gce: gapi.client.calendar.Events
-): AppointmentModel[] => {
-  return gce.items.map(
-    (value): AppointmentModel => {
-      if (value.start.dateTime && value.end.dateTime) {
-        return {
-          title: value.summary,
-          startDate: value.start.dateTime,
-          endDate: value.end.dateTime,
-        };
-      } else {
-        return {
-          title: value.summary,
-          startDate: new Date(),
-          endDate: new Date(),
-        };
-      }
-    }
-  );
-};
+
+const Appointment: React.FC<
+  Appointments.AppointmentProps & {
+    style?: React.CSSProperties;
+  }
+> = ({ data, children, style, ...restProps }) => (
+  <Appointments.Appointment
+    {...restProps}
+    data={data}
+    style={{
+      ...style,
+      opacity: data.isDone && "50%",
+    }}
+  >
+    {children}
+  </Appointments.Appointment>
+);
 
 interface CalendarProps {
   readonly tasks: StringMapType<TaskWithTaskListKeyType>;
   readonly userId: string;
+  readonly scheduleMode: boolean;
+  setScheduleMode(scheduleMode: boolean): void;
 }
 
-export const Calendar: React.FC<CalendarProps> = ({ tasks, userId }) => {
-  const [events, setEvents] = useState<AppointmentModel[]>([]);
+export const Calendar: React.FC<CalendarProps> = ({
+  tasks,
+  userId,
+  scheduleMode,
+  setScheduleMode,
+}) => {
   const [currentDate, setCurrentDate] = useState<Date>(now);
-
-  const calendarContext = useContext(CalendarContext);
-  const getCalendarEvents = async () => {
-    if (gapi && gapi.client && gapi.client.calendar !== undefined) {
-      const request = await gapi.client.calendar.events.list({
-        calendarId: CALENDAR_ID,
-        timeMin: currentDate.toISOString(),
-        timeMax: new Date(
-          currentDate.getTime() + oneWeekInMilliseconds
-        ).toISOString(),
-      });
-
-      if (request.status === 200) {
-        setEvents(
-          googleCalendarEventToAppointmentModelConverter(request.result)
-        );
-      }
-    } else {
-      console.log("gapi.client.calendar is undefined");
-    }
-  };
-
-  useEffect(() => {
-    if (calendarContext.isReady) {
-      getCalendarEvents();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentDate, calendarContext.isReady]);
 
   const onCommitChanges = ({ changed }: ChangeSet) => {
     if (changed) {
@@ -89,27 +63,52 @@ export const Calendar: React.FC<CalendarProps> = ({ tasks, userId }) => {
         const path = `/${userId}/tasks/${task.taskListKey}/${taskKey}`;
         const change = changed[taskKey];
         database.ref(path).update({
-          dueDate: change.startDate.valueOf(),
+          startDateTime: change.startDate.valueOf(),
+          endDateTime: change.endDate.valueOf(),
         });
       });
     }
   };
 
   return (
-    <Scheduler data={[...events, ...convertTaskToAppointmentModel(tasks)]}>
+    <Scheduler data={convertTaskToAppointmentModel(tasks)}>
       <ViewState
         currentDate={currentDate}
         onCurrentDateChange={setCurrentDate}
+        defaultCurrentViewName={"Week"}
       />
       <EditingState onCommitChanges={onCommitChanges} />
       <IntegratedEditing />
-      <Toolbar />
+      <Toolbar
+        flexibleSpaceComponent={() => (
+          <>
+            <div style={{ margin: "auto" }} />
+            <div>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={scheduleMode}
+                    onChange={(event, checked) => {
+                      setScheduleMode(checked);
+                    }}
+                    name="checkedA"
+                    inputProps={{ "aria-label": "secondary checkbox" }}
+                  />
+                }
+                label="Full Screen"
+              />
+            </div>
+          </>
+        )}
+      />
+      <ViewSwitcher />
       <DateNavigator />
       <TodayButton />
       <WeekView startDayHour={9} endDayHour={19} />
-      <Appointments />
+      <MonthView />
+      <Appointments appointmentComponent={Appointment} />
 
-      <AppointmentTooltip showCloseButton showOpenButton />
+      <AppointmentTooltip showCloseButton />
       <DragDropProvider allowDrag={() => true} />
     </Scheduler>
   );
@@ -121,8 +120,9 @@ const convertTaskToAppointmentModel = (
   return Object.keys(tasks).map((taskKey) => {
     const task = tasks[taskKey];
     return {
-      startDate: task.dueDate,
-      endDate: task.dueDate,
+      isDone: task.isDone,
+      startDate: task.startDateTime,
+      endDate: task.endDateTime,
       title: task.name,
       id: taskKey,
     };
