@@ -31,6 +31,7 @@ const useStyles = makeStyles((theme: Theme) =>
     paper: {
       padding: theme.spacing(2),
       textAlign: "center",
+      cursor: "pointer",
     },
   })
 );
@@ -135,12 +136,19 @@ export const Home: React.FC = () => {
                 return (
                   <Grid item style={{ width: "100%" }} key={key}>
                     <DragContainer id={key} index={index} moveItem={moveCard}>
-                      <Paper className={classes.paper}>
+                      <Paper
+                        className={classes.paper}
+                        onClick={(event) => {
+                          // @ts-ignore
+                          if (event.target.type !== "checkbox") {
+                            openTaskListDialog();
+                          }
+                        }}
+                      >
                         <TaskList
                           taskListKey={key}
                           taskListName={taskList.name}
                           userId={user?.uid || ""}
-                          openTaskListDialog={openTaskListDialog}
                         />
                       </Paper>
                     </DragContainer>

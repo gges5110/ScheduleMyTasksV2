@@ -1,7 +1,7 @@
 import React from "react";
 import {
-  Button,
   Checkbox,
+  IconButton,
   Input,
   Paper,
   Table,
@@ -16,6 +16,7 @@ import { database } from "../../firebase/config";
 import { MobileDateTimePicker } from "@material-ui/pickers";
 import { TaskType } from "../../interfaces/Task";
 import firebase from "firebase";
+import CloseIcon from "@material-ui/icons/Close";
 
 interface TaskListTableProps {
   readonly tasks: firebase.database.DataSnapshot[];
@@ -106,15 +107,15 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
                   />
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  <Button
-                    variant={"contained"}
+                  <IconButton
+                    aria-label="delete"
                     color={"default"}
                     onClick={() => {
                       handleOnTaskDelete(key);
                     }}
                   >
-                    Delete
-                  </Button>
+                    <CloseIcon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             );
