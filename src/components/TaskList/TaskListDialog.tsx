@@ -23,7 +23,7 @@ import { CreateTaskForm } from "../CreateTaskForm";
 const useTaskListDialogStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      backgroundColor: "aliceblue",
+      backgroundColor: theme.palette.background.default,
     },
   })
 );

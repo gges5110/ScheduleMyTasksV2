@@ -1,20 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Container from "@material-ui/core/Container";
 import { makeStyles } from "@material-ui/core/styles";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { Routes } from "./Routes";
-import { auth } from "../firebase/config";
-import * as firebase from "firebase";
 import { User } from "firebase";
-import { UserContext } from "../contexts/Contexts";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
     flexDirection: "column",
     minHeight: "100vh",
-    backgroundColor: "aliceblue",
+    backgroundColor: theme.palette.background.default,
   },
   main: {
     marginTop: theme.spacing(3),
@@ -22,39 +19,24 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export interface CalendarConfig {
-  isReady: boolean;
+interface PageProps {
+  readonly user?: User;
 }
 
-export const Page: React.FC = () => {
+export const Page: React.FC<PageProps> = ({ user }) => {
   const classes = useStyles();
 
-  const [user, setUser] = useState<User | undefined>(undefined);
-
-  useEffect(() => {
-    return auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(undefined);
-        await firebase
-          .auth()
-          .signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-      }
-    });
-  }, []);
-
   return (
-    <div className={classes.root}>
-      <Header user={user} />
+    <div className="App">
+      <div className={classes.root}>
+        <Header user={user} />
 
-      <UserContext.Provider value={user}>
         <Container component="main" className={classes.main} maxWidth="xl">
           <Routes />
         </Container>
-      </UserContext.Provider>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 };
