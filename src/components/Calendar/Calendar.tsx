@@ -8,38 +8,22 @@ import {
 import React, { useState } from "react";
 import {
   Appointments,
+  AppointmentTooltip,
   DateNavigator,
+  DragDropProvider,
+  MonthView,
   Scheduler,
   TodayButton,
   Toolbar,
-  WeekView,
-  AppointmentTooltip,
-  DragDropProvider,
   ViewSwitcher,
-  MonthView,
+  WeekView,
 } from "@devexpress/dx-react-scheduler-material-ui";
 import { StringMapType, TaskWithTaskListKeyType } from "../../interfaces/Task";
 import { database } from "../../firebase/config";
-import { FormControlLabel, Switch } from "@material-ui/core";
+import { FormControlLabel, Hidden, Switch } from "@material-ui/core";
+import { Appointment } from "./Appointment";
 
 const now = new Date();
-
-const Appointment: React.FC<
-  Appointments.AppointmentProps & {
-    style?: React.CSSProperties;
-  }
-> = ({ data, children, style, ...restProps }) => (
-  <Appointments.Appointment
-    {...restProps}
-    data={data}
-    style={{
-      ...style,
-      opacity: data.isDone && "50%",
-    }}
-  >
-    {children}
-  </Appointments.Appointment>
-);
 
 interface CalendarProps {
   readonly tasks: StringMapType<TaskWithTaskListKeyType>;
@@ -83,7 +67,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         flexibleSpaceComponent={() => (
           <>
             <div style={{ margin: "auto" }} />
-            <div>
+            <Hidden mdDown={true}>
               <FormControlLabel
                 control={
                   <Switch
@@ -97,14 +81,14 @@ export const Calendar: React.FC<CalendarProps> = ({
                 }
                 label="Full Screen"
               />
-            </div>
+            </Hidden>
           </>
         )}
       />
       <ViewSwitcher />
       <DateNavigator />
       <TodayButton />
-      <WeekView startDayHour={9} endDayHour={19} />
+      <WeekView cellDuration={60} />
       <MonthView />
       <Appointments appointmentComponent={Appointment} />
 

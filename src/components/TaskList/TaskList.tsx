@@ -3,6 +3,7 @@ import { database } from "../../firebase/config";
 import { TaskType } from "../../interfaces/Task";
 import {
   Checkbox,
+  Divider,
   List,
   ListItem,
   ListItemIcon,
@@ -14,15 +15,12 @@ interface TaskListProps {
   readonly taskListKey: string;
   readonly taskListName: string;
   readonly userId: string;
-
-  openTaskListDialog(): void;
 }
 
 export const TaskList: React.FC<TaskListProps> = ({
   taskListKey,
   taskListName,
   userId,
-  openTaskListDialog,
 }) => {
   const labelId = `checkbox-list-label-${taskListName}`;
 
@@ -51,37 +49,32 @@ export const TaskList: React.FC<TaskListProps> = ({
             });
           };
 
+          const shouldInsertDivider =
+            index > 0 && !tasks[index - 1].val().isDone && task.isDone;
+
           return (
-            <ListItem key={key}>
-              <ListItemIcon>
-                <Checkbox
-                  checked={task.isDone}
-                  onChange={(event) => onCheck(event, key)}
-                  inputProps={{ "aria-labelledby": labelId }}
+            <>
+              {shouldInsertDivider && <Divider />}
+              <ListItem key={key}>
+                <ListItemIcon>
+                  <Checkbox
+                    checked={task.isDone}
+                    onChange={(event) => onCheck(event, key)}
+                    inputProps={{ "aria-labelledby": labelId }}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  style={{
+                    textDecoration: task.isDone ? "line-through" : "none",
+                  }}
+                  id={labelId}
+                  primary={task.name}
+                  secondary={new Date(task.startDateTime).toLocaleString()}
                 />
-              </ListItemIcon>
-              <ListItemText
-                style={{
-                  cursor: "pointer",
-                  textDecoration: task.isDone ? "line-through" : "none",
-                }}
-                id={labelId}
-                primary={task.name}
-                secondary={new Date(task.startDateTime).toLocaleString()}
-                onClick={openTaskListDialog}
-              />
-            </ListItem>
+              </ListItem>
+            </>
           );
         })}
-      {tasks && Object.keys(tasks).length === 0 && (
-        <ListItem role={undefined}>
-          <ListItemText
-            primary={"Empty list"}
-            style={{ cursor: "pointer" }}
-            onClick={openTaskListDialog}
-          />
-        </ListItem>
-      )}
     </List>
   );
 };

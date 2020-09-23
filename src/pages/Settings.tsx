@@ -2,7 +2,15 @@ import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../contexts/Contexts";
 import { useObject } from "react-firebase-hooks/database";
 import { database } from "../firebase/config";
-import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
+import {
+  createStyles,
+  FormControl,
+  InputLabel,
+  makeStyles,
+  MenuItem,
+  Select,
+  Theme,
+} from "@material-ui/core";
 
 export enum ThemePreference {
   DARK = "DARK",
@@ -10,25 +18,37 @@ export enum ThemePreference {
   SYSTEM = "SYSTEM",
 }
 
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      "& > *": {
+        margin: theme.spacing(1),
+        width: "25ch",
+      },
+    },
+  })
+);
+
 export const Settings: React.FC = () => {
+  const classes = useStyles();
   const userContext = useContext(UserContext);
 
   const [darkThemePreference, setDarkThemePreference] = useState<
     ThemePreference
   >(ThemePreference.SYSTEM);
 
-  const [value] = useObject(
+  const [themePreference] = useObject(
     database.ref(`${userContext?.uid}/settings/themePreference`)
   );
 
   useEffect(() => {
-    if (value && value.val() !== null) {
-      setDarkThemePreference(value.val());
+    if (themePreference && themePreference.val() !== null) {
+      setDarkThemePreference(themePreference.val());
     }
-  }, [value]);
+  }, [themePreference]);
 
   return (
-    <>
+    <form className={classes.root}>
       <FormControl>
         <InputLabel id="demo-simple-select-helper-label">Theme</InputLabel>
         <Select
@@ -45,8 +65,7 @@ export const Settings: React.FC = () => {
           <MenuItem value={ThemePreference.LIGHT}>Light</MenuItem>
           <MenuItem value={ThemePreference.DARK}>Dark</MenuItem>
         </Select>
-        {/*<FormHelperText>Some important helper text</FormHelperText>*/}
       </FormControl>
-    </>
+    </form>
   );
 };
