@@ -69,7 +69,13 @@ export const TaskList: React.FC<TaskListProps> = ({
                   }}
                   id={labelId}
                   primary={task.name}
-                  secondary={new Date(task.startDateTime).toLocaleString()}
+                  secondary={new Date(task.startDateTime).toLocaleString([], {
+                    year: "numeric",
+                    month: "numeric",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 />
               </ListItem>
             </>

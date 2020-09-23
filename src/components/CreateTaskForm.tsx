@@ -25,6 +25,16 @@ const useCreateTaskFormStyles = makeStyles((theme: Theme) =>
   })
 );
 
+const getDefaultStartDate = () => {
+  return roundTimeQuarterHour(new Date());
+};
+
+const getDefaultEndDate = () => {
+  const d = roundTimeQuarterHour(new Date());
+  d.setHours(d.getHours() + 1);
+  return d;
+};
+
 interface CreateTaskFormProps {
   readonly userId: string;
   readonly taskListKey: string;
@@ -40,9 +50,9 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
   const [
     selectedStartDate,
     handleSelectedStartDateChange,
-  ] = useState<Date | null>(new Date());
+  ] = useState<Date | null>(getDefaultStartDate());
   const [selectedEndDate, handleSelectedEndDateChange] = useState<Date | null>(
-    new Date()
+    getDefaultEndDate()
   );
 
   const onClickAddNewTask = (
@@ -94,6 +104,7 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
           renderInput={(props) => <TextField {...props} />}
           label="Start Date"
           inputFormat={"MM/dd/yyyy HH:mm"}
+          minutesStep={30}
           value={selectedStartDate}
           onChange={handleSelectedStartDateChange}
         />
@@ -102,8 +113,9 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
         <DateTimePicker
           renderInput={(props) => <TextField {...props} />}
           label="End Date"
+          minutesStep={30}
           inputFormat={"MM/dd/yyyy HH:mm"}
-          value={selectedStartDate}
+          value={selectedEndDate}
           onChange={handleSelectedEndDateChange}
         />
       </FormControl>
@@ -119,4 +131,15 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
       </Button>
     </form>
   );
+};
+
+const roundTimeQuarterHour = (time: number | string | Date): Date => {
+  const timeToReturn = new Date(time);
+
+  timeToReturn.setMilliseconds(
+    Math.ceil(timeToReturn.getMilliseconds() / 1000) * 1000
+  );
+  timeToReturn.setSeconds(Math.ceil(timeToReturn.getSeconds() / 60) * 60);
+  timeToReturn.setMinutes(Math.ceil(timeToReturn.getMinutes() / 30) * 30);
+  return timeToReturn;
 };
