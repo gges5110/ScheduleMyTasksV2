@@ -1,17 +1,38 @@
 import React from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import { AppBar, Avatar, Button, IconButton, Toolbar } from "@material-ui/core";
+import {
+  AppBar,
+  Avatar,
+  Button,
+  createStyles,
+  IconButton,
+  makeStyles,
+  Theme,
+  Toolbar,
+} from "@material-ui/core";
 import Container from "@material-ui/core/Container";
 import { NavMenuButton } from "./NavMenuButton";
 import EventIcon from "@material-ui/icons/Event";
 import { User } from "firebase";
 import { auth } from "../firebase/config";
 
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      backgroundColor:
+        theme.palette.type === "dark"
+          ? theme.palette.background.paper
+          : undefined,
+    },
+  })
+);
+
 interface HeaderProps {
   readonly user?: User;
 }
 
 export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
+  const classes = useStyles();
   const location = useLocation();
   const history = useHistory();
 
@@ -23,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
   };
 
   return (
-    <AppBar position="relative">
+    <AppBar position="relative" className={classes.root}>
       <Container maxWidth="lg">
         <Toolbar>
           <NavMenuButton
