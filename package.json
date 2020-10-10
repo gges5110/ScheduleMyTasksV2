@@ -12,7 +12,7 @@
     "@material-ui/icons": "4.9.1",
     "@material-ui/pickers": "4.0.0-alpha.12",
     "date-fns": "2.16.1",
-    "firebase": "7.22.0",
+    "firebase": "7.23.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-firebase-hooks": "2.2.0",
