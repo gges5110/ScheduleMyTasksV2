@@ -40,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
 
   const onSignOut = () => {
     console.log("Log out");
-    auth.signOut().then(() => gapi.auth2.getAuthInstance().signOut());
+    auth.signOut();
   };
 
   return (

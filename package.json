@@ -17,7 +17,7 @@
     "react-dom": "17.0.1",
     "react-firebase-hooks": "2.2.0",
     "react-router-dom": "5.2.0",
-    "react-scripts": "3.4.3",
+    "react-scripts": "4.0.0",
     "typescript": "4.0.5"
   },
   "scripts": {
@@ -44,19 +44,17 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/dom": "^7.26.6",
     "@testing-library/jest-dom": "5.11.5",
     "@testing-library/react": "11.1.1",
     "@testing-library/user-event": "12.2.0",
-    "@types/gapi": "0.0.39",
-    "@types/gapi.auth2": "0.0.52",
-    "@types/gapi.calendar": "3.0.4",
     "@types/jest": "26.0.15",
     "@types/node": "12.12.56",
     "@types/react": "16.9.56",
     "@types/react-dom": "16.9.9",
     "@types/react-router-dom": "5.1.6",
-    "@typescript-eslint/eslint-plugin": "3.10.1",
-    "@typescript-eslint/parser": "3.10.1",
+    "@typescript-eslint/eslint-plugin": "4.7.0",
+    "@typescript-eslint/parser": "4.7.0",
     "eslint-config-prettier": "6.15.0",
     "eslint-config-react": "1.1.7",
     "eslint-plugin-prettier": "3.1.4",
@@ -75,6 +73,14 @@
     "*.{tsx,ts,json,md}": [
       "prettier --write",
       "git add"
+    ]
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/serviceWorker.ts"
     ]
   }
 }

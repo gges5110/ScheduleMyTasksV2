@@ -2,6 +2,7 @@ import React, { ChangeEvent, useState } from "react";
 import { database } from "../firebase/config";
 import { Button, FormControl, Input, InputLabel } from "@material-ui/core";
 import { TaskListType } from "../interfaces/Task";
+import { ThenableReference } from "../interfaces/FirebaseTypes";
 
 interface CreateTaskListFormProps {
   readonly userId: string;
@@ -13,7 +14,13 @@ export const CreateTaskListForm: React.FC<CreateTaskListFormProps> = ({
   taskListCount,
 }) => {
   const [newListName, setNewListName] = useState<string>("");
-  const createNewTaskList = (
+  const userTaskListPath = `/${userId}/taskLists`;
+
+  const createNewTaskList = (newTaskList: TaskListType): ThenableReference => {
+    return database.ref(userTaskListPath).push(newTaskList);
+  };
+
+  const onSubmitOrClick = (
     event:
       | React.FormEvent<HTMLFormElement>
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -23,8 +30,9 @@ export const CreateTaskListForm: React.FC<CreateTaskListFormProps> = ({
       name: newListName,
       sortingIndex: taskListCount,
     };
-    database.ref(`/${userId}/taskLists`).push(newTaskList);
-    setNewListName("");
+    createNewTaskList(newTaskList).then(() => {
+      setNewListName("");
+    });
   };
 
   const handleNewListNameChange = (
@@ -34,7 +42,7 @@ export const CreateTaskListForm: React.FC<CreateTaskListFormProps> = ({
   };
 
   return (
-    <form autoComplete="off" onSubmit={createNewTaskList}>
+    <form autoComplete="off" onSubmit={onSubmitOrClick}>
       <FormControl required={true}>
         <InputLabel htmlFor="component-simple">New List Name</InputLabel>
         <Input
@@ -47,8 +55,9 @@ export const CreateTaskListForm: React.FC<CreateTaskListFormProps> = ({
         style={{ marginTop: 12, marginLeft: 12 }}
         type={"button"}
         color={"primary"}
+        disabled={newListName === ""}
         variant={"contained"}
-        onClick={createNewTaskList}
+        onClick={onSubmitOrClick}
       >
         Add
       </Button>

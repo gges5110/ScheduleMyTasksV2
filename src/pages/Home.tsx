@@ -1,5 +1,6 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
+  CircularProgress,
   createStyles,
   Grid,
   makeStyles,
@@ -7,21 +8,16 @@ import {
   Theme,
 } from "@material-ui/core";
 import { database } from "../firebase/config";
-import { useFirebaseQuery } from "../hooks/useFirebaseQuery";
 import { TaskList } from "../components/TaskList/TaskList";
-import { TaskListDialog } from "../components/TaskList/TaskListDialog";
+import { TaskListDialog } from "../components/TaskListDialog/TaskListDialog";
 import { CreateTaskListForm } from "../components/CreateTaskListForm";
-import {
-  StringMapType,
-  TaskListType,
-  TaskType,
-  TaskWithTaskListKeyType,
-} from "../interfaces/Task";
+import { TaskListType } from "../interfaces/Task";
 import { UserContext } from "../contexts/Contexts";
-import { Calendar } from "../components/Calendar/Calendar";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
 import { DragContainer } from "../components/DragContainer";
+import { CalendarContainer } from "../components/Calendar/CalendarContainer";
+import { useTaskLists } from "../hooks/useTaskLists";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -36,8 +32,6 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-export const CALENDAR_ID = "primary";
-
 export const Home: React.FC = () => {
   const classes = useStyles();
   const [taskListDialogOpen, setTaskListDialogOpen] = useState<boolean>(false);
@@ -51,26 +45,8 @@ export const Home: React.FC = () => {
   // TaskList
   const user = useContext(UserContext);
   const uid = user?.uid;
-  const taskListsQuery = useMemo(
-    () => database.ref(`/${uid}/taskLists`).orderByChild("sortingIndex"),
-    [uid]
-  );
-  const taskLists: StringMapType<TaskListType> = useFirebaseQuery(
-    taskListsQuery
-  );
 
-  const tasksQuery = useMemo(
-    () => database.ref(`/${uid}/tasks`).orderByValue(),
-    [uid]
-  );
-
-  const tasksMap: StringMapType<StringMapType<TaskType>> = useFirebaseQuery(
-    tasksQuery
-  );
-
-  const sortedTaskListKeys = Object.keys(taskLists).sort(
-    (a, b) => taskLists[a].sortingIndex - taskLists[b].sortingIndex
-  );
+  const [taskLists, taskListsLoading] = useTaskLists();
 
   const [scheduleMode, setScheduleMode] = useState<boolean>(false);
   return (
@@ -78,11 +54,10 @@ export const Home: React.FC = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} lg={scheduleMode ? 12 : 9}>
           <Paper className={classes.paper}>
-            <Calendar
-              tasks={convert(tasksMap)}
+            <CalendarContainer
               userId={user?.uid || ""}
               scheduleMode={scheduleMode}
-              setScheduleMode={(scheduleMode) => setScheduleMode(scheduleMode)}
+              setScheduleMode={setScheduleMode}
             />
           </Paper>
         </Grid>
@@ -104,13 +79,15 @@ export const Home: React.FC = () => {
               <Paper className={classes.paper}>
                 <CreateTaskListForm
                   userId={user?.uid || ""}
-                  taskListCount={sortedTaskListKeys.length}
+                  taskListCount={taskLists?.length || 0}
                 />
               </Paper>
             </Grid>
             <DndProvider backend={HTML5Backend}>
-              {sortedTaskListKeys.map((key: string, index: number) => {
-                const taskList = taskLists[key];
+              {taskListsLoading && <CircularProgress />}
+              {taskLists?.map((taskListSnapshot, index: number) => {
+                const taskList: TaskListType = taskListSnapshot.val();
+                const key = taskListSnapshot.key || "";
 
                 const openTaskListDialog = () => {
                   setTaskListDialogOpen(true);
@@ -119,15 +96,16 @@ export const Home: React.FC = () => {
                 };
 
                 const moveCard = (dragIndex: number, hoverIndex: number) => {
-                  const targetKey = sortedTaskListKeys[dragIndex];
-
+                  const targetKey = taskLists[dragIndex].key;
+                  const originalTaskListPath = `/${uid}/taskLists/${key}`;
+                  const targetTaskListPath = `/${uid}/taskLists/${targetKey}`;
                   database
-                    .ref(`/${uid}/taskLists/${key}`)
+                    .ref(originalTaskListPath)
                     .update({
                       sortingIndex: dragIndex,
                     })
                     .then(() => {
-                      database.ref(`/${uid}/taskLists/${targetKey}`).update({
+                      database.ref(targetTaskListPath).update({
                         sortingIndex: hoverIndex,
                       });
                     });
@@ -174,20 +152,4 @@ export const Home: React.FC = () => {
       )}
     </div>
   );
-};
-
-const convert = (
-  t: StringMapType<StringMapType<TaskType>>
-): StringMapType<TaskWithTaskListKeyType> => {
-  const taskTypeArray: StringMapType<TaskWithTaskListKeyType> = {};
-  Object.keys(t).forEach((taskListKey) => {
-    const t1 = t[taskListKey];
-    Object.keys(t1).forEach((taskKey) => {
-      taskTypeArray[taskKey] = {
-        ...t1[taskKey],
-        taskListKey: taskListKey,
-      };
-    });
-  });
-  return taskTypeArray;
 };
