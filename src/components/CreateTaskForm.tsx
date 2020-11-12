@@ -35,7 +35,7 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
   userId,
   taskListKey,
 }) => {
-  const userTaskPath = `/${userId}/tasks/${taskListKey}`;
+  const userTaskPath = `/${userId}/tasks`;
   const classes = useCreateTaskFormStyles();
 
   const [newTaskName, setNewTaskName] = useState<string>("");
@@ -51,19 +51,24 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
     return database.ref(userTaskPath).push(task);
   };
 
-  const onClickAddNewTask = (
-    event:
-      | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    event.preventDefault();
-    const task: TaskType = {
+  const getNewTask = (): TaskType => {
+    return {
+      taskListKey: taskListKey,
       name: newTaskName,
       startDateTime: selectedStartDate?.getTime() || 0,
       endDateTime: selectedEndDate?.getTime() || 0,
       isDone: false,
       isDoneTimestamp: null,
     };
+  };
+
+  const onClickAddNewTask = (
+    event:
+      | React.FormEvent<HTMLFormElement>
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    const task = getNewTask();
     createNewTask(task).then(() => {
       // Reset values
       setNewTaskName("");
@@ -72,13 +77,7 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
 
   const onEnter = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter") {
-      const task: TaskType = {
-        name: newTaskName,
-        startDateTime: selectedStartDate?.getTime() || 0,
-        endDateTime: selectedEndDate?.getTime() || 0,
-        isDone: false,
-        isDoneTimestamp: null,
-      };
+      const task = getNewTask();
       createNewTask(task).then(() => {
         // Reset values
         setNewTaskName("");

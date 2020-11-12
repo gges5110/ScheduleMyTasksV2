@@ -20,14 +20,12 @@ import { DataSnapshot } from "../../interfaces/FirebaseTypes";
 
 interface TaskListTableProps {
   readonly tasks: DataSnapshot[];
-  readonly uid: string;
   readonly userId: string;
   onTaskDelete(key: string): void;
 }
 
 export const TaskListTable: React.FC<TaskListTableProps> = ({
   tasks,
-  uid,
   userId,
   onTaskDelete,
 }) => {
@@ -51,7 +49,7 @@ export const TaskListTable: React.FC<TaskListTableProps> = ({
           {tasks.map((snapshot) => {
             const task: TaskType = snapshot.val();
             const key = snapshot.key || "";
-            const path = `/${userId}/tasks/${uid}/${key}`;
+            const path = `/${userId}/tasks/${key}`;
             return (
               <TableRow key={task.name}>
                 <TableCell component="th" scope="row">

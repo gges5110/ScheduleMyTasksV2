@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   CircularProgress,
   createStyles,
@@ -9,15 +9,15 @@ import {
 } from "@material-ui/core";
 import { database } from "../firebase/config";
 import { TaskList } from "../components/TaskList/TaskList";
-import { TaskListDialog } from "../components/TaskList/TaskListDialog";
+import { TaskListDialog } from "../components/TaskListDialog/TaskListDialog";
 import { CreateTaskListForm } from "../components/CreateTaskListForm";
 import { TaskListType } from "../interfaces/Task";
 import { UserContext } from "../contexts/Contexts";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider } from "react-dnd";
 import { DragContainer } from "../components/DragContainer";
-import { useList } from "react-firebase-hooks/database";
 import { CalendarContainer } from "../components/Calendar/CalendarContainer";
+import { useTaskLists } from "../hooks/useTaskLists";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -45,14 +45,8 @@ export const Home: React.FC = () => {
   // TaskList
   const user = useContext(UserContext);
   const uid = user?.uid;
-  const taskListsQuery = useMemo(
-    () => database.ref(`/${uid}/taskLists`).orderByChild("sortingIndex"),
-    [uid]
-  );
 
-  const [taskLists, taskListsLoading] = useList(taskListsQuery);
-
-  taskLists?.sort((a, b) => a.val().sortingIndex - b.val().sortingIndex);
+  const [taskLists, taskListsLoading] = useTaskLists();
 
   const [scheduleMode, setScheduleMode] = useState<boolean>(false);
   return (
@@ -92,7 +86,7 @@ export const Home: React.FC = () => {
             <DndProvider backend={HTML5Backend}>
               {taskListsLoading && <CircularProgress />}
               {taskLists?.map((taskListSnapshot, index: number) => {
-                const taskList = taskListSnapshot.val();
+                const taskList: TaskListType = taskListSnapshot.val();
                 const key = taskListSnapshot.key || "";
 
                 const openTaskListDialog = () => {

@@ -1,4 +1,5 @@
 export interface TaskType {
+  readonly taskListKey: string;
   readonly name: string;
   readonly isDone: boolean;
   readonly isDoneTimestamp: number | null;
@@ -6,15 +7,7 @@ export interface TaskType {
   readonly endDateTime: number;
 }
 
-export interface TaskWithTaskListKeyType extends TaskType {
-  readonly taskListKey: string;
-}
-
 export interface TaskListType {
   readonly name: string;
   readonly sortingIndex: number;
-}
-
-export interface StringMapType<T> {
-  [index: string]: T;
 }

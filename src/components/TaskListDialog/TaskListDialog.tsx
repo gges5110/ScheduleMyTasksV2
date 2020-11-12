@@ -17,8 +17,8 @@ import {
 import { TaskListTable } from "./TaskListTable";
 import { DeleteTaskDialog } from "./DeleteTaskDialog";
 import { DeleteTaskListDialog } from "./DeleteTaskListDialog";
-import { useList } from "react-firebase-hooks/database";
 import { CreateTaskForm } from "../CreateTaskForm";
+import { useTasks } from "../../hooks/useTasks";
 
 const useTaskListDialogStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -45,12 +45,9 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
   userId,
 }) => {
   const classes = useTaskListDialogStyles();
+  const taskListPath = `/${userId}/taskLists/${taskListKey}`;
 
-  const [tasks] = useList(
-    database
-      .ref(`/${userId}/tasks/${taskListKey}`)
-      .orderByChild("isDoneTimestamp")
-  );
+  const [tasks] = useTasks(taskListKey);
 
   // Delete Task
   const [deleteTaskDialogOpen, setDeleteTaskDialogOpen] = useState<boolean>(
@@ -62,29 +59,35 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
   const [taskUidToDelete, setTaskUidToDelete] = useState<string>("");
 
   const handleDeleteTask = () => {
-    database.ref(`/${userId}/tasks/${taskListKey}/${taskUidToDelete}`).remove();
-    setDeleteTaskDialogOpen(false);
+    database
+      .ref(`/${userId}/tasks/${taskUidToDelete}`)
+      .remove()
+      .then(() => {
+        setDeleteTaskDialogOpen(false);
+      });
   };
 
   const handleDeleteTaskList = () => {
-    database
-      .ref(`/${userId}/taskLists/${taskListKey}`)
-      .remove()
+    // Remove all tasks in this task list
+    Promise.all(
+      tasks?.map((task) => {
+        return database.ref(`/${userId}/tasks/${task.key}`).remove();
+      }) || []
+    )
+      .then(() => database.ref(taskListPath).remove())
       .then(() => {
-        database
-          .ref(`/${userId}/tasks/${taskListKey}`)
-          .remove()
-          .then(() => {
-            setDeleteTaskListDialogOpen(false);
-            handleClose();
-          });
+        setDeleteTaskListDialogOpen(false);
+        handleClose();
       });
   };
 
   const updateTaskListName = (name: string) => {
-    database.ref(`/${userId}/taskLists/${taskListKey}`).update({
-      name,
-    });
+    database
+      .ref(taskListPath)
+      .update({
+        name,
+      })
+      .catch((err) => console.warn(err));
   };
 
   return (
@@ -123,7 +126,6 @@ export const TaskListDialog: React.FC<TaskListDialogProps> = ({
       <DialogContent className={classes.root}>
         <TaskListTable
           tasks={tasks || []}
-          uid={taskListKey || ""}
           userId={userId}
           onTaskDelete={(key) => {
             setDeleteTaskDialogOpen(true);

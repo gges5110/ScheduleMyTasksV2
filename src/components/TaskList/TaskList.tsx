@@ -2,8 +2,8 @@ import React from "react";
 import { database } from "../../firebase/config";
 import { TaskType } from "../../interfaces/Task";
 import { Divider, List } from "@material-ui/core";
-import { useList } from "react-firebase-hooks/database";
 import { TaskListItem } from "./TaskListItem";
+import { useTasks } from "../../hooks/useTasks";
 
 interface TaskListProps {
   readonly taskListKey: string;
@@ -17,15 +17,13 @@ export const TaskList: React.FC<TaskListProps> = ({
   userId,
 }) => {
   const labelId = `checkbox-list-label-${taskListName}`;
-  const taskListPath = `/${userId}/tasks/${taskListKey}`;
+  const tasksRootPath = `/${userId}/tasks`;
 
-  const [tasks] = useList(
-    database.ref(taskListPath).orderByChild("isDoneTimestamp")
-  );
+  const [clonedTasks] = useTasks(taskListKey);
 
   return (
     <List subheader={<>{taskListName}</>} key={taskListKey} dense={true}>
-      {tasks?.map((snapshot, index: number) => {
+      {clonedTasks.map((snapshot, index: number) => {
         const task: TaskType = snapshot.val();
         const key = snapshot.key || "";
 
@@ -33,15 +31,15 @@ export const TaskList: React.FC<TaskListProps> = ({
           { target: { checked } }: React.ChangeEvent<HTMLInputElement>,
           taskKey: string
         ) => {
-          database.ref(`${taskListPath}/${taskKey}`).update({
+          database.ref(`${tasksRootPath}/${taskKey}`).update({
             isDone: checked,
             isDoneTimestamp: checked ? new Date().valueOf() : null,
           });
         };
 
         const shouldInsertDivider =
-          index > 0 && !tasks[index - 1].val().isDone && task.isDone;
-
+          index > 0 && !clonedTasks[index - 1].val().isDone && task.isDone;
+        // debugger;
         return (
           <>
             {shouldInsertDivider && <Divider />}
