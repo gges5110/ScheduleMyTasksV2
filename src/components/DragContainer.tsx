@@ -75,7 +75,7 @@ export const DragContainer: React.FC<DragContainerProps> = ({
 
   const [{ isDragging }, drag] = useDrag({
     item: { type: "card", id, index },
-    collect: (monitor: any) => ({
+    collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
