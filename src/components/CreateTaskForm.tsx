@@ -12,6 +12,7 @@ import {
   Theme,
 } from "@material-ui/core";
 import { DateTimePicker } from "@material-ui/pickers";
+import { ThenableReference } from "../interfaces/FirebaseTypes";
 
 const useCreateTaskFormStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -25,16 +26,6 @@ const useCreateTaskFormStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const getDefaultStartDate = () => {
-  return roundTimeQuarterHour(new Date());
-};
-
-const getDefaultEndDate = () => {
-  const d = roundTimeQuarterHour(new Date());
-  d.setHours(d.getHours() + 1);
-  return d;
-};
-
 interface CreateTaskFormProps {
   readonly userId: string;
   readonly taskListKey: string;
@@ -44,6 +35,7 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
   userId,
   taskListKey,
 }) => {
+  const userTaskPath = `/${userId}/tasks/${taskListKey}`;
   const classes = useCreateTaskFormStyles();
 
   const [newTaskName, setNewTaskName] = useState<string>("");
@@ -55,31 +47,42 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
     getDefaultEndDate()
   );
 
+  const createNewTask = (task: TaskType): ThenableReference => {
+    return database.ref(userTaskPath).push(task);
+  };
+
   const onClickAddNewTask = (
     event:
       | React.FormEvent<HTMLFormElement>
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.preventDefault();
-    createNewTask();
-  };
-
-  const createNewTask = () => {
-    const value: TaskType = {
+    const task: TaskType = {
       name: newTaskName,
       startDateTime: selectedStartDate?.getTime() || 0,
       endDateTime: selectedEndDate?.getTime() || 0,
       isDone: false,
       isDoneTimestamp: null,
     };
-    database.ref(`/${userId}/tasks/${taskListKey}`).push(value);
-    // Reset values
-    setNewTaskName("");
+    createNewTask(task).then(() => {
+      // Reset values
+      setNewTaskName("");
+    });
   };
 
   const onEnter = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter") {
-      createNewTask();
+      const task: TaskType = {
+        name: newTaskName,
+        startDateTime: selectedStartDate?.getTime() || 0,
+        endDateTime: selectedEndDate?.getTime() || 0,
+        isDone: false,
+        isDoneTimestamp: null,
+      };
+      createNewTask(task).then(() => {
+        // Reset values
+        setNewTaskName("");
+      });
     }
   };
 
@@ -131,6 +134,16 @@ export const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
       </Button>
     </form>
   );
+};
+
+const getDefaultStartDate = (): Date => {
+  return roundTimeQuarterHour(new Date());
+};
+
+const getDefaultEndDate = (): Date => {
+  const d = roundTimeQuarterHour(new Date());
+  d.setHours(d.getHours() + 1);
+  return d;
 };
 
 const roundTimeQuarterHour = (time: number | string | Date): Date => {

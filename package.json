@@ -44,6 +44,7 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/dom": "^7.26.6",
     "@testing-library/jest-dom": "5.11.5",
     "@testing-library/react": "11.1.1",
     "@testing-library/user-event": "12.2.0",
@@ -75,6 +76,14 @@
     "*.{tsx,ts,json,md}": [
       "prettier --write",
       "git add"
+    ]
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/serviceWorker.ts"
     ]
   }
 }

@@ -2,7 +2,6 @@ import React from "react";
 import Container from "@material-ui/core/Container";
 import { makeStyles } from "@material-ui/core/styles";
 import { Header } from "./Header";
-import { Footer } from "./Footer";
 import { Routes } from "./Routes";
 import { User } from "firebase";
 
@@ -34,8 +33,6 @@ export const Page: React.FC<PageProps> = ({ user }) => {
         <Container component="main" className={classes.main} maxWidth="xl">
           <Routes />
         </Container>
-
-        <Footer />
       </div>
     </div>
   );

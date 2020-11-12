@@ -15,11 +15,11 @@ import {
 import { database } from "../../firebase/config";
 import { MobileDateTimePicker } from "@material-ui/pickers";
 import { TaskType } from "../../interfaces/Task";
-import firebase from "firebase";
 import CloseIcon from "@material-ui/icons/Close";
+import { DataSnapshot } from "../../interfaces/FirebaseTypes";
 
 interface TaskListTableProps {
-  readonly tasks: firebase.database.DataSnapshot[];
+  readonly tasks: DataSnapshot[];
   readonly uid: string;
   readonly userId: string;
   onTaskDelete(key: string): void;
