@@ -4,7 +4,7 @@
   "private": false,
   "homepage": "https://schedulemytasks.firebaseapp.com/",
   "dependencies": {
-    "@date-io/date-fns": "2.10.7",
+    "@date-io/date-fns": "2.10.8",
     "@devexpress/dx-react-core": "2.7.4",
     "@devexpress/dx-react-scheduler": "2.7.4",
     "@devexpress/dx-react-scheduler-material-ui": "2.7.4",
