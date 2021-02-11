@@ -70,7 +70,14 @@ export const Header: React.FC<HeaderProps> = ({ user }: HeaderProps) => {
               </Button>
             </>
           ) : (
-            <Button color="inherit">Log in</Button>
+            <Button
+              color="inherit"
+              onClick={() => {
+                history.push("/login");
+              }}
+            >
+              Log in
+            </Button>
           )}
         </Toolbar>
       </Container>

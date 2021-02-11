@@ -5,12 +5,14 @@ import { database } from "../firebase/config";
 import {
   createStyles,
   FormControl,
+  Grid,
   InputLabel,
   makeStyles,
   MenuItem,
   Select,
   Theme,
 } from "@material-ui/core";
+import { ProfileCard } from "../components/ProfileCard";
 
 export enum ThemePreference {
   DARK = "DARK",
@@ -20,11 +22,15 @@ export enum ThemePreference {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
+    form: {
       "& > *": {
         margin: theme.spacing(1),
         width: "25ch",
       },
+    },
+    root: {
+      maxWidth: 1000,
+      margin: "auto",
     },
   })
 );
@@ -41,6 +47,8 @@ export const Settings: React.FC = () => {
     database.ref(`${userContext?.uid}/settings/themePreference`)
   );
 
+  console.log(userContext);
+
   useEffect(() => {
     if (themePreference && themePreference.val() !== null) {
       setDarkThemePreference(themePreference.val());
@@ -48,24 +56,35 @@ export const Settings: React.FC = () => {
   }, [themePreference]);
 
   return (
-    <form className={classes.root}>
-      <FormControl>
-        <InputLabel id="demo-simple-select-helper-label">Theme</InputLabel>
-        <Select
-          labelId="demo-simple-select-helper-label"
-          id="demo-simple-select-helper"
-          value={darkThemePreference}
-          onChange={(event) => {
-            database
-              .ref(`${userContext?.uid}/settings/themePreference`)
-              .set(event.target.value);
-          }}
-        >
-          <MenuItem value={ThemePreference.SYSTEM}>System</MenuItem>
-          <MenuItem value={ThemePreference.LIGHT}>Light</MenuItem>
-          <MenuItem value={ThemePreference.DARK}>Dark</MenuItem>
-        </Select>
-      </FormControl>
-    </form>
+    <div className={classes.root}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={4}>
+          {userContext && <ProfileCard user={userContext} />}
+        </Grid>
+        <Grid item xs={12} sm={8}>
+          <form className={classes.form}>
+            <FormControl>
+              <InputLabel id="demo-simple-select-helper-label">
+                Theme
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-helper-label"
+                id="demo-simple-select-helper"
+                value={darkThemePreference}
+                onChange={(event) => {
+                  database
+                    .ref(`${userContext?.uid}/settings/themePreference`)
+                    .set(event.target.value);
+                }}
+              >
+                <MenuItem value={ThemePreference.SYSTEM}>System</MenuItem>
+                <MenuItem value={ThemePreference.LIGHT}>Light</MenuItem>
+                <MenuItem value={ThemePreference.DARK}>Dark</MenuItem>
+              </Select>
+            </FormControl>
+          </form>
+        </Grid>
+      </Grid>
+    </div>
   );
 };

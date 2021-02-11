@@ -2,6 +2,7 @@ import "./App.css";
 import * as React from "react";
 import { Page } from "./components/Page";
 import { BrowserRouter } from "react-router-dom";
+import { useHistory } from "react-router";
 import { LocalizationProvider } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import { useEffect, useState } from "react";
@@ -15,6 +16,12 @@ import { Theme } from "@material-ui/core/styles/createMuiTheme";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { ThemePreference } from "./pages/Settings";
 
+const WrappedWithRouter: React.FC = () => (
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+);
+
 const App: React.FC = () => {
   const [user, setUser] = useState<User | undefined>(undefined);
 
@@ -25,6 +32,7 @@ const App: React.FC = () => {
   );
 
   const [theme, setTheme] = useState<Theme>(createMuiTheme());
+  const history = useHistory();
 
   useEffect(() => {
     setTheme(
@@ -52,14 +60,7 @@ const App: React.FC = () => {
         setUser(user);
       } else {
         setUser(undefined);
-        await firebase
-          .auth()
-          .setPersistence("local")
-          .then(() => {
-            firebase
-              .auth()
-              .signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-          });
+        history.push("/login");
       }
     });
   }, []);
@@ -67,17 +68,15 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <LocalizationProvider dateAdapter={DateFnsUtils}>
-        <BrowserRouter>
-          <UserContext.Provider value={user}>
-            <Page user={user} />
-          </UserContext.Provider>
-        </BrowserRouter>
+        <UserContext.Provider value={user}>
+          <Page user={user} />
+        </UserContext.Provider>
       </LocalizationProvider>
     </ThemeProvider>
   );
 };
 
-export default App;
+export default WrappedWithRouter;
 
 const deriveTheme = (
   themePreference: firebase.database.DataSnapshot | undefined,
