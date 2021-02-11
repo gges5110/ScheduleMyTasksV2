@@ -39,9 +39,8 @@ export const TaskList: React.FC<TaskListProps> = ({
 
         const shouldInsertDivider =
           index > 0 && !clonedTasks[index - 1].val().isDone && task.isDone;
-        // debugger;
         return (
-          <>
+          <div key={key}>
             {shouldInsertDivider && <Divider />}
             <TaskListItem
               key={key}
@@ -50,7 +49,7 @@ export const TaskList: React.FC<TaskListProps> = ({
               task={task}
               onCheck={onCheck}
             />
-          </>
+          </div>
         );
       })}
     </List>
