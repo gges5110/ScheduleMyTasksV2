@@ -58,7 +58,7 @@
     "eslint-config-prettier": "7.2.0",
     "eslint-config-react": "1.1.7",
     "eslint-plugin-prettier": "3.4.0",
-    "husky": "7.0.0",
+    "husky": "7.0.1",
     "lint-staged": "11.0.0",
     "prettier": "2.1.2",
     "react-dnd": "13.1.1",
